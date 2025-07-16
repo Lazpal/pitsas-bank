@@ -227,12 +227,12 @@ pitsas-camp-bank/
 ## 📞 Επικοινωνία
 
 Για ερωτήσεις ή υποστήριξη:
-- 📧 Email: [your-email@example.com]
-- 🐛 Issues: [GitHub Issues](https://github.com/yourusername/pitsas-camp-bank/issues)
+- 📧 Email: [pallazarosb@gmail.com]
+- 🐛 Issues: [GitHub Issues](https://github.com/Lazpal/pitsas-bank/issues)
 
 ---
 
 <div align="center">
   <p>Φτιαγμένο με ❤️ για τις κατασκηνώσεις</p>
-  <p><strong>Pitsas Camp Bank © 2025</strong></p>
+  <p><strong>Lazpal © 2025</strong></p>
 </div>
