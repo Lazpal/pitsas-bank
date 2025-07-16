@@ -2,7 +2,7 @@
 
 > Σύστημα διαχείρισης χρημάτων για κατασκηνώσεις - Ψηφιακή τράπεζα κατασκηνωτών
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![License]
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white)
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black)
@@ -60,8 +60,8 @@
 
 1. **Clone το repository:**
 ```bash
-git clone https://github.com/lazpal/pitsas-bank.git
-cd pitsas-bank
+git clone https://github.com/yourusername/pitsas-camp-bank.git
+cd pitsas-camp-bank
 ```
 
 2. **Άνοιγμα με web server:**
@@ -222,17 +222,17 @@ pitsas-camp-bank/
 
 ## 📄 Άδεια Χρήσης
 
-Αυτό το project είναι υπό την άδεια [MIT License](LICENSE).
+Αυτό το project είναι υπό την άδεια [Lazpal License](LICENSE).
 
 ## 📞 Επικοινωνία
 
 Για ερωτήσεις ή υποστήριξη:
-- 📧 Email: [pallazarosb@gmail.com]
-- 🐛 Issues: [GitHub Issues](https://github.com/Lazpal/pitsas-bank/issues)
+- 📧 Email: [your-email@example.com]
+- 🐛 Issues: [GitHub Issues](https://github.com/yourusername/pitsas-camp-bank/issues)
 
 ---
 
 <div align="center">
   <p>Φτιαγμένο με ❤️ για τις κατασκηνώσεις</p>
-  <p><strong>Lazpal © 2025</strong></p>
+  <p><strong>Pitsas Camp Bank © 2025</strong></p>
 </div>
