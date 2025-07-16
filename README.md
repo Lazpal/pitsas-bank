@@ -60,8 +60,8 @@
 
 1. **Clone το repository:**
 ```bash
-git clone https://github.com/yourusername/pitsas-camp-bank.git
-cd pitsas-camp-bank
+git clone https://github.com/lazpal/pitsas-bank.git
+cd pitsas-bank
 ```
 
 2. **Άνοιγμα με web server:**
