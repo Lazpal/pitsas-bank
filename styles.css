@@ -1,0 +1,53 @@
+/* Developer Credit Styling */
+.developer-credit {
+    font-size: 0.8rem;
+    color: #6c757d;
+    text-align: center;
+    margin-top: 0.5rem;
+}
+
+.developer-credit a {
+    color: #007bff;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.developer-credit a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+.receipt-footer .developer-credit {
+    font-size: 0.7rem;
+    margin-top: 0.5rem;
+    border-top: 1px dotted #ddd;
+    padding-top: 0.5rem;
+}
+
+.id-card-footer small {
+    font-size: 0.6rem;
+    color: #999;
+}
+
+.id-card-footer small a {
+    color: #777;
+    text-decoration: none;
+}
+
+.id-card-footer small a:hover {
+    text-decoration: underline;
+}
+
+/* Footer Styling */
+footer {
+    background-color: #f8f9fa !important;
+    border-top: 1px solid #dee2e6;
+}
+
+footer small a {
+    font-weight: 500;
+}
+
+footer small a:hover {
+    text-decoration: underline !important;
+}

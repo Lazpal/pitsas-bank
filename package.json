@@ -8,7 +8,11 @@
     "dev": "electron . --dev",
     "electron": "electron ."
   },
-  "author": "Λάζαρος Παλιαμαξίδης",
+  "author": {
+    "name": "Λάζαρος Παλιαμαξίδης",
+    "email": "pallazarosb@gmail.com",
+    "url": "mailto:pallazarosb@gmail.com"
+  },
   "license": "Lazaro's License",
   "devDependencies": {
     "electron": "^latest"

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f8f9fa;
+            color: #333;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .logo-container {
+            text-align: center;
+            animation: fadeInScale 1s ease-out;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border: 1px solid #e9ecef;
+        }
+        .logo {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+            display: block;
+        }
+        .app-name {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+        .subtitle {
+            font-size: 16px;
+            color: #6c757d;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+        .copyright {
+            font-size: 12px;
+            color: #9ca3af;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+        .version {
+            font-size: 11px;
+            color: #d1d5db;
+            margin-bottom: 15px;
+        }
+        .loading-dots {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            animation: loading-wave 1.4s infinite ease-in-out;
+            box-shadow: 0 2px 6px rgba(0,123,255,0.4);
+        }
+        .dot:nth-child(1) { animation-delay: -0.32s; }
+        .dot:nth-child(2) { animation-delay: -0.16s; }
+        .dot:nth-child(3) { animation-delay: 0s; }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0) scale(1);
+            }
+            40% {
+                transform: translateY(-20px) scale(1.1);
+            }
+            60% {
+                transform: translateY(-10px) scale(1.05);
+            }
+        }
+        
+        @keyframes fadeInScale {
+            0% {
+                opacity: 0;
+                transform: scale(0.8) translateY(30px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        
+        @keyframes loading-wave {
+            0%, 40%, 100% {
+                transform: scaleY(0.4) scaleX(0.8);
+                opacity: 0.6;
+            }
+            20% {
+                transform: scaleY(1.3) scaleX(1.1);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="logo-container">
+        <img src="img/logo.png" alt="logo" style="height: 25px;">
+        <div class="logo">🏦</div>
+        <div class="app-name">PITSAS BANK</div>
+        <div class="subtitle">Εικονική Τράπεζα Κατασκήνωσης</div>
+        <div class="copyright">
+            © 2025 Λάζαρος Παλιαμαξίδης<br>
+            Όλα τα δικαιώματα διατηρούνται<br>
+            <small style="font-size: 10px; color: #b3b7bb;">
+                Designed & Developed by 
+                <a href="mailto:pallazarosb@gmail.com" style="color: #8b93a1; text-decoration: none;">Lazaros Paliamaxidis</a>
+            </small>
+        </div>
+        <div class="version">Version 1.0.0</div>
+        <div class="loading-dots">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
+
+    </div>
+</body>
+</html>
