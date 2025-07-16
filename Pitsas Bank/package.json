@@ -1,0 +1,16 @@
+{
+  "name": "pitsas-camp-bank",
+  "version": "1.0.0",
+  "description": "Εικονική Τράπεζα για Κατασκηνώσεις",
+  "main": "Main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "electron": "electron ."
+  },
+  "author": "Λάζαρος Παλιαμαξίδης",
+  "license": "Lazaro's License",
+  "devDependencies": {
+    "electron": "^latest"
+  }
+}
