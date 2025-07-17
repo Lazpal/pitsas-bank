@@ -66,18 +66,8 @@ cd pitsas-camp-bank
 
 2. **Άνοιγμα με web server:**
 ```bash
-# Με Python
-python -m http.server 8000
-
-# Με Node.js
-npx serve .
-
-# Ή άνοιγμα του index.html απευθείας στο browser
+άνοιξε το αρχείο -> Bank System start.bat
 ```
-
-3. **Πρόσβαση στην εφαρμογή:**
-   - Άνοιξε το browser στο `http://localhost:8000`
-   - Ή άνοιξε απευθείας το `index.html`
 
 ### Πρώτη Σύνδεση
 
@@ -191,17 +181,15 @@ pitsas-camp-bank/
 
 **3. Responsive issues:**
 - Κάντε refresh τη σελίδα
-- Ελέγξτε το zoom level του browser
 
 ## 🤝 Συνεισφορά
 
-Οι συνεισφορές είναι ευπρόσδεκτες! Για να συνεισφέρετε:
+---
+## ☕ Support My Work
 
-1. Fork το repository
-2. Δημιουργήστε ένα feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit τις αλλαγές σας (`git commit -m 'Add amazing feature'`)
-4. Push στο branch (`git push origin feature/amazing-feature`)
-5. Ανοίξτε ένα Pull Request
+If you like what I do, consider donating:
+
+[![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/donate?hosted_button_id=BC8S3RFPLQTHN)
 
 ### Development Guidelines
 - Χρησιμοποιήστε ελληνικά comments στο code
