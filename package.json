@@ -5,16 +5,96 @@
   "main": "Main.js",
   "scripts": {
     "start": "electron .",
-    "dev": "electron . --dev",
-    "electron": "electron ."
+    "dev": "cross-env NODE_ENV=development electron . --dev",
+    "build": "electron-builder",
+    "build-win": "electron-builder --win",
+    "build-all": "electron-builder --win --mac --linux",
+    "electron": "electron .",
+    "postinstall": "electron-builder install-app-deps",
+    "clean": "rimraf dist node_modules package-lock.json",
+    "rebuild": "npm run clean && npm install",
+    "test": "echo \"No tests specified\" && exit 0",
+    "validate": "node validate-production.js",
+    "security-audit": "node security-audit.js",
+    "pre-release": "npm run validate && npm run security-audit"
   },
+  "keywords": ["electron", "bank", "camp", "pitsas", "virtual-bank"],
   "author": {
     "name": "Λάζαρος Παλιαμαξίδης",
     "email": "pallazarosb@gmail.com",
-    "url": "https://lazpal.github.io/-/"
+    "url": "mailto:pallazarosb@gmail.com"
   },
   "license": "Lazaro's License",
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
   "devDependencies": {
-    "electron": "^latest"
+    "electron": "^28.2.0",
+    "electron-builder": "^24.13.3",
+    "cross-env": "^7.0.3",
+    "rimraf": "^5.0.5"
+  },
+  "dependencies": {},
+  "build": {
+    "appId": "com.pitsas.camp.bank",
+    "productName": "Pitsas Camp Bank",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "app/**/*",
+      "Main.js",
+      "package.json",
+      "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
+      "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
+      "!**/node_modules/*.d.ts",
+      "!**/node_modules/.bin",
+      "!**/*.{iml,o,hprof,orig,pyc,pyo,rbc,swp,csproj,sln,xproj}",
+      "!.editorconfig",
+      "!**/._*",
+      "!**/{.DS_Store,.git,.hg,.svn,CVS,RCS,SCCS,.gitignore,.gitattributes}",
+      "!**/{__pycache__,thumbs.db,.flowconfig,.idea,.vs,.nyc_output}",
+      "!**/{appveyor.yml,.travis.yml,circle.yml}",
+      "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}",
+      "!**/validate-production.js",
+      "!**/security-audit.js"
+    ],
+    "asar": true,
+    "asarUnpack": [
+      "**/node_modules/sharp/**/*"
+    ],
+    "compression": "maximum",
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64", "ia32"]
+        },
+        {
+          "target": "portable", 
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "app/img/favicon.png",
+      "requestedExecutionLevel": "asInvoker",
+      "artifactName": "${productName}_${version}_${arch}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Pitsas Camp Bank",
+      "installerIcon": "app/img/favicon.png",
+      "uninstallerIcon": "app/img/favicon.png",
+      "installerHeaderIcon": "app/img/favicon.png",
+      "license": "LICENSE",
+      "displayLanguageSelector": false,
+      "language": "1032"
+    },
+    "portable": {
+      "artifactName": "${productName}_${version}_Portable.${ext}"
+    }
   }
 }

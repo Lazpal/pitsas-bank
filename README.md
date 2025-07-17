@@ -2,6 +2,7 @@
 
 > Σύστημα διαχείρισης χρημάτων για κατασκηνώσεις - Ψηφιακή τράπεζα κατασκηνωτών
 
+![License]
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white)
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black)
@@ -59,14 +60,24 @@
 
 1. **Clone το repository:**
 ```bash
-git clone https://github.com/Lazpal/pitsas-bank.git
-cd pitsas-bank
+git clone https://github.com/yourusername/pitsas-camp-bank.git
+cd pitsas-camp-bank
 ```
 
 2. **Άνοιγμα με web server:**
+```bash
+# Με Python
+python -m http.server 8000
 
-άνοιξε το αρχείο -> Bank System start.bat
+# Με Node.js
+npx serve .
 
+# Ή άνοιγμα του index.html απευθείας στο browser
+```
+
+3. **Πρόσβαση στην εφαρμογή:**
+   - Άνοιξε το browser στο `http://localhost:8000`
+   - Ή άνοιξε απευθείας το `index.html`
 
 ### Πρώτη Σύνδεση
 
@@ -180,15 +191,17 @@ pitsas-camp-bank/
 
 **3. Responsive issues:**
 - Κάντε refresh τη σελίδα
+- Ελέγξτε το zoom level του browser
 
 ## 🤝 Συνεισφορά
 
----
-## ☕ Support My Work
+Οι συνεισφορές είναι ευπρόσδεκτες! Για να συνεισφέρετε:
 
-If you like what I do, consider donating:
-
-[![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/donate?hosted_button_id=BC8S3RFPLQTHN)
+1. Fork το repository
+2. Δημιουργήστε ένα feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit τις αλλαγές σας (`git commit -m 'Add amazing feature'`)
+4. Push στο branch (`git push origin feature/amazing-feature`)
+5. Ανοίξτε ένα Pull Request
 
 ### Development Guidelines
 - Χρησιμοποιήστε ελληνικά comments στο code
@@ -220,7 +233,7 @@ If you like what I do, consider donating:
 ---
 
 <div align="center">
-  <p>Designed & Developed with ❤️ by <a href="https://lazpal.github.io/-/">Lazaros Paliamaxidis</a></p>
+  <p>Designed & Developed with ❤️ by <a href="mailto:pallazarosb@gmail.com">Lazaros Paliamaxidis</a></p>
   <p>Φτιαγμένο για τις κατασκηνώσεις Pitsas Camp</p>
   <p><strong>Pitsas Camp Bank © 2025</strong></p>
 </div>

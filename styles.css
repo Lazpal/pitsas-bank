@@ -51,3 +51,300 @@ footer small a {
 footer small a:hover {
     text-decoration: underline !important;
 }
+
+/* ===== ΕΛΑΦΡΙΑ ANIMATIONS ===== */
+
+/* Fade in animation για γενική χρήση */
+.fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Search results animation */
+.search-result-item {
+    animation: slideInUp 0.4s ease-out forwards;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+@keyframes slideInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Button animations */
+.btn-animated {
+    transition: all 0.2s ease-in-out;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-animated:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.btn-animated:active {
+    transform: translateY(0);
+}
+
+/* Notification animations */
+.notification-slide-in {
+    animation: notificationSlideIn 0.4s ease-out;
+}
+
+@keyframes notificationSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(300px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.notification-icon-bounce {
+    animation: iconBounce 0.6s ease-in-out;
+}
+
+@keyframes iconBounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-5px);
+    }
+    60% {
+        transform: translateY(-3px);
+    }
+}
+
+/* Smart alerts animations */
+.smart-alert-slide-in {
+    animation: smartAlertSlideIn 0.5s ease-out;
+}
+
+@keyframes smartAlertSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.smart-alert-pulse {
+    animation: alertPulse 2s infinite;
+}
+
+@keyframes alertPulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(1.1);
+    }
+}
+
+/* Card hover effects */
+.dashboard-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+
+/* Table row animations */
+.table tbody tr {
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(0,123,255,0.05) !important;
+    transform: scale(1.005);
+}
+
+/* Modal animations enhancement */
+.modal.fade .modal-dialog {
+    transition: transform 0.3s ease-out;
+    transform: translateY(-50px);
+}
+
+.modal.show .modal-dialog {
+    transform: translateY(0);
+}
+
+/* Form focus animations */
+.form-control:focus {
+    transition: all 0.2s ease;
+    transform: scale(1.02);
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+}
+
+/* Loading spinner με custom animation */
+.spinner-custom {
+    animation: spinCustom 1s linear infinite;
+}
+
+@keyframes spinCustom {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Breadcrumb animations */
+.breadcrumb-item {
+    transition: all 0.2s ease;
+}
+
+.breadcrumb-item:hover {
+    transform: translateX(2px);
+}
+
+/* Navbar stats badge animations */
+.badge {
+    transition: all 0.2s ease;
+}
+
+.badge:hover {
+    transform: scale(1.1);
+}
+
+/* Quick action button animations */
+.action-button {
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.action-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.action-button:hover i {
+    animation: actionIconWiggle 0.3s ease-in-out;
+}
+
+@keyframes actionIconWiggle {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-5deg); }
+    75% { transform: rotate(5deg); }
+}
+
+/* Performance optimizations */
+.search-result-item,
+.notification-slide-in,
+.smart-alert-slide-in,
+.btn-animated,
+.dashboard-card {
+    will-change: transform;
+}
+
+/* Disable animations for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Mobile optimizations */
+.mobile-optimized .search-result-item {
+    animation-duration: 0.2s;
+}
+
+.mobile-optimized .notification-slide-in {
+    animation-duration: 0.3s;
+}
+
+.mobile-optimized .smart-alert-slide-in {
+    animation-duration: 0.3s;
+}
+
+/* Loading states */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255,255,255,0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease;
+}
+
+/* Improved focus states for accessibility */
+.btn:focus-visible {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+    animation: focusPulse 0.3s ease;
+}
+
+@keyframes focusPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* Modal keyboard navigation hints */
+.modal-content {
+    position: relative;
+}
+
+.modal-content::after {
+    content: "💡 Συμβουλή: Πατήστε Enter για επιβεβαίωση ή Esc για κλείσιμο";
+    position: absolute;
+    bottom: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 11px;
+    color: #6c757d;
+    background: rgba(248, 249, 250, 0.9);
+    padding: 2px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.modal.show .modal-content::after {
+    opacity: 1;
+}
+
+/* Special styling for receipt and ID card modals */
+#receiptModal .modal-content::after,
+#idCardModal .modal-content::after {
+    content: "💡 Πατήστε Enter για κλείσιμο";
+}
+
+/* Hide hint on mobile devices */
+@media (max-width: 768px) {
+    .modal-content::after {
+        display: none;
+    }
+}

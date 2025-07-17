@@ -15,9 +15,9 @@ echo   #      #     #    #      #   #  #         #   #  #   #  #  ##  #  #
 echo   #      #     #    #####  #   #  #####     ####   #   #  #   #  #   #
 echo.
 echo                          PITSAS CAMP BANK SYSTEM
-echo                             Version 1.0.0
+echo                               Version 1.0.0
 echo                     Copyright 2025 - Lazaros Paliamaxidis
-echo                         Eikoniki Trapeza Kataskhnosis
+echo                          Eikoniki Trapeza Kataskhnosis
 echo.
 echo ================================================================================
 echo.
@@ -35,7 +35,7 @@ echo.
 
 echo [STARTING] Opening Pitsas Camp Bank...
 color 0B
-npx electron .
+npm start
 
 REM Check if application started successfully
 if errorlevel 1 (

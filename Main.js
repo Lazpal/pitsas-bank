@@ -1,5 +1,6 @@
-const { app, BrowserWindow, Menu } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain } = require('electron');
 const path = require('path');
+const fs = require('fs');
 
 let splash = null;
 let mainWindow = null;
@@ -35,25 +36,37 @@ function createWindow() {
     minWidth: 800,
     minHeight: 600,
     webPreferences: {
-      nodeIntegration: true,         // Επαναφορά για λειτουργικότητα
-      contextIsolation: false,       // Επαναφορά για localStorage
-      webSecurity: false            // Για τοπικά αρχεία
+      nodeIntegration: false,        // Ασφάλεια 
+      contextIsolation: true,        // Ασφάλεια
+      preload: path.join(__dirname, 'app/preload.js'), // Preload script για IPC
+      webSecurity: true,             // Ενεργοποίηση web security για production
+      allowRunningInsecureContent: false,
+      experimentalFeatures: false
     },
     icon: path.join(__dirname, 'app/img/favicon.png'),
     title: 'Pitsas Camp Bank',
-    show: false // Θα εμφανιστεί όταν είναι έτοιμο
+    show: false, // Θα εμφανιστεί όταν είναι έτοιμο
+    focusable: true,
+    alwaysOnTop: false,
+    skipTaskbar: false,
+    autoHideMenuBar: true,    // Απόκρυψη menu bar
+    titleBarStyle: 'default'  // Standard title bar
   });
 
   // Loading progress tracking
   let loadingProgress = 0;
   
   mainWindow.webContents.on('did-start-loading', () => {
-    console.log('Started loading main window...');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Started loading main window...');
+    }
     updateSplashProgress(20);
   });
 
   mainWindow.webContents.on('did-finish-load', () => {
-    console.log('Finished loading main window...');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Finished loading main window...');
+    }
     updateSplashProgress(80);
     
     // Περίμενε λίγο για να φορτώσουν τα styles/scripts
@@ -76,6 +89,55 @@ function createWindow() {
 
   mainWindow.loadFile('app/index.html');
   
+  // Focus management για modals και popups
+  mainWindow.on('focus', () => {
+    // Εξασφάλιση ότι το κύριο παράθυρο παίρνει focus
+    setTimeout(() => {
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.focus();
+      }
+    }, 50);
+  });
+  
+  // Χειρισμός όταν το παράθυρο χάνει focus
+  mainWindow.on('blur', () => {
+    // Επαναφορά focus μετά από λίγο (για modals) - πιο αγρεσσικό
+    setTimeout(() => {
+      if (mainWindow && !mainWindow.isDestroyed() && mainWindow.isVisible() && !mainWindow.isMinimized()) {
+        // Έλεγχος αν υπάρχει άλλο παράθυρο ανοιχτό
+        const allWindows = require('electron').BrowserWindow.getAllWindows();
+        const focusedWindow = require('electron').BrowserWindow.getFocusedWindow();
+        
+        if (!focusedWindow || focusedWindow === mainWindow) {
+          mainWindow.focus();
+          mainWindow.webContents.focus();
+        }
+      }
+    }, 200);
+  });
+  
+  // Χειρισμός keyboard events για focus
+  mainWindow.webContents.on('before-input-event', (event, input) => {
+    // Εάν πατηθεί Escape, εξασφάλιση focus
+    if (input.key === 'Escape') {
+      setTimeout(() => {
+        if (mainWindow && !mainWindow.isDestroyed()) {
+          mainWindow.focus();
+          mainWindow.webContents.focus();
+        }
+      }, 50);
+    }
+  });
+  
+  // Αντιμετώπιση παραθύρων που κλέβουν focus
+  mainWindow.on('page-title-updated', (event) => {
+    setTimeout(() => {
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.focus();
+      }
+    }, 100);
+  });
+  
   // Hide menu bar in production
   Menu.setApplicationMenu(null);
   
@@ -83,10 +145,131 @@ function createWindow() {
   // mainWindow.webContents.openDevTools();
 }
 
+// Αυτόματο Backup Σύστημα
+const autoBackupPath = path.join(app.getPath('userData'), 'pitsas_auto_backup.json');
+
+// IPC Handlers για αυτόματο backup
+ipcMain.handle('save-auto-backup', async (event, backupData) => {
+  try {
+    // Εξασφάλιση ότι υπάρχει ο φάκελος
+    const userDataPath = app.getPath('userData');
+    if (!fs.existsSync(userDataPath)) {
+      fs.mkdirSync(userDataPath, { recursive: true });
+    }
+    
+    // Αποθήκευση backup - ΣΙΩΠΗΛΑ
+    fs.writeFileSync(autoBackupPath, backupData, 'utf8');
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('load-auto-backup', async (event) => {
+  try {
+    if (fs.existsSync(autoBackupPath)) {
+      const backupData = fs.readFileSync(autoBackupPath, 'utf8');
+      return backupData;
+    } else {
+      return null;
+    }
+  } catch (error) {
+    return null;
+  }
+});
+
+// Αυτόματο backup όταν κλείνει η εφαρμογή - ΣΙΩΠΗΛΑ
+app.on('before-quit', () => {
+  // Στείλε σήμα στο renderer process να κάνει backup
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('app-closing');
+  }
+});
+
+// Enhanced IPC Handlers για focus management
+ipcMain.handle('focus-main-window', async () => {
+  try {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      // Multi-step focus restoration
+      if (mainWindow.isMinimized()) {
+        mainWindow.restore();
+      }
+      
+      mainWindow.show();
+      mainWindow.moveTop();
+      mainWindow.focus();
+      
+      // Επιπλέον focus στο web content
+      setTimeout(() => {
+        if (mainWindow && !mainWindow.isDestroyed()) {
+          mainWindow.webContents.focus();
+          mainWindow.webContents.executeJavaScript('window.focus(); document.body.focus();').catch(err => {
+            if (process.env.NODE_ENV === 'development') {
+              console.log('Focus script execution failed:', err.message);
+            }
+          });
+        }
+      }, 50);
+      
+      return { success: true };
+    }
+    return { success: false, error: 'Window not available' };
+  } catch (error) {
+    console.error('Focus main window error:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('restore-focus', async () => {
+  try {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      // Aggressive focus restoration
+      mainWindow.setAlwaysOnTop(true);
+      mainWindow.focus();
+      mainWindow.webContents.focus();
+      
+      setTimeout(() => {
+        if (mainWindow && !mainWindow.isDestroyed()) {
+          mainWindow.setAlwaysOnTop(false);
+          mainWindow.webContents.executeJavaScript(`
+            window.focus();
+            document.body.focus();
+            
+            // Focus σε κάποιο input element
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput && searchInput.style.display !== 'none') {
+              searchInput.focus();
+            } else {
+              const inputs = document.querySelectorAll('input:not([type="hidden"]), textarea');
+              for (let input of inputs) {
+                if (input.offsetParent !== null && !input.disabled) {
+                  input.focus();
+                  break;
+                }
+              }
+            }
+          `).catch(err => {
+            if (process.env.NODE_ENV === 'development') {
+              console.log('Restore focus script execution failed:', err.message);
+            }
+          });
+        }
+      }, 100);
+      
+      return { success: true };
+    }
+    return { success: false, error: 'Window not available' };
+  } catch (error) {
+    console.error('Restore focus error:', error);
+    return { success: false, error: error.message };
+  }
+});
+
 function updateSplashProgress(progress) {
-  // Το νέο splash screen δεν χρειάζεται progress updates
-  // Αφήνουμε μόνο τα animations να τρέχουν
-  console.log(`Loading progress: ${progress}%`);
+  // Production mode - silent logging
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`Loading progress: ${progress}%`);
+  }
 }
 
 app.whenReady().then(() => {
