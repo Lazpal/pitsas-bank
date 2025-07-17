@@ -2,7 +2,6 @@
 
 > Σύστημα διαχείρισης χρημάτων για κατασκηνώσεις - Ψηφιακή τράπεζα κατασκηνωτών
 
-![License]
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white)
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black)
@@ -65,9 +64,9 @@ cd pitsas-bank
 ```
 
 2. **Άνοιγμα με web server:**
-```bash
+
 άνοιξε το αρχείο -> Bank System start.bat
-```
+
 
 ### Πρώτη Σύνδεση
 
@@ -221,7 +220,7 @@ If you like what I do, consider donating:
 ---
 
 <div align="center">
-  <p>Designed & Developed with ❤️ by <a href="mailto:pallazarosb@gmail.com">Lazaros Paliamaxidis</a></p>
+  <p>Designed & Developed with ❤️ by <a href="https://lazpal.github.io/-/">Lazaros Paliamaxidis</a></p>
   <p>Φτιαγμένο για τις κατασκηνώσεις Pitsas Camp</p>
   <p><strong>Pitsas Camp Bank © 2025</strong></p>
 </div>
