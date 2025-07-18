@@ -754,3 +754,408 @@ body.dark-mode .form-select:focus {
 body.dark-mode .search-results .table-hover tbody tr:hover {
     background-color: rgba(255, 255, 255, 0.1);
 }
+
+/* Documentation Modal Styles */
+.documentation-content {
+    max-height: 600px;
+    overflow-y: auto;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    padding: 1.5rem;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.documentation-content h1,
+.documentation-content h2,
+.documentation-content h3,
+.documentation-content h4,
+.documentation-content h5,
+.documentation-content h6 {
+    color: #0d6efd;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.documentation-content h1 {
+    font-size: 2rem;
+    border-bottom: 2px solid #0d6efd;
+    padding-bottom: 0.5rem;
+}
+
+.documentation-content h2 {
+    font-size: 1.5rem;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 0.25rem;
+}
+
+.documentation-content h3 {
+    font-size: 1.25rem;
+    color: #198754;
+}
+
+.documentation-content h4 {
+    font-size: 1.1rem;
+    color: #dc3545;
+}
+
+.documentation-content blockquote {
+    border-left: 4px solid #0d6efd;
+    padding-left: 1rem;
+    margin: 1rem 0;
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.375rem;
+}
+
+.documentation-content code {
+    background-color: #f8f9fa;
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.25rem;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 0.875rem;
+}
+
+.documentation-content pre {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.375rem;
+    overflow-x: auto;
+    border: 1px solid #dee2e6;
+}
+
+.documentation-content pre code {
+    background-color: transparent;
+    padding: 0;
+    font-size: 0.9rem;
+}
+
+.documentation-content ul,
+.documentation-content ol {
+    margin-bottom: 1rem;
+}
+
+.documentation-content li {
+    margin-bottom: 0.5rem;
+}
+
+.documentation-content table {
+    width: 100%;
+    margin-bottom: 1rem;
+    border-collapse: collapse;
+}
+
+.documentation-content table th,
+.documentation-content table td {
+    padding: 0.75rem;
+    border: 1px solid #dee2e6;
+    text-align: left;
+}
+
+.documentation-content table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+.documentation-content table tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+.documentation-content .alert {
+    margin: 1rem 0;
+}
+
+.documentation-content kbd {
+    background-color: #212529;
+    color: #fff;
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.25rem;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 0.875rem;
+}
+
+.documentation-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.375rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin: 1rem 0;
+}
+
+.documentation-content hr {
+    margin: 2rem 0;
+    border: 0;
+    border-top: 1px solid #dee2e6;
+}
+
+.documentation-content .highlight {
+    background-color: #fff3cd;
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.25rem;
+}
+
+/* Dark mode styles for documentation */
+body.dark-mode .documentation-content {
+    background-color: #212529;
+    border-color: #495057;
+    color: #f8f9fa;
+}
+
+body.dark-mode .documentation-content h1,
+body.dark-mode .documentation-content h2,
+body.dark-mode .documentation-content h3,
+body.dark-mode .documentation-content h4,
+body.dark-mode .documentation-content h5,
+body.dark-mode .documentation-content h6 {
+    color: #86b7fe;
+}
+
+body.dark-mode .documentation-content h1 {
+    border-bottom-color: #86b7fe;
+}
+
+body.dark-mode .documentation-content h2 {
+    border-bottom-color: #495057;
+}
+
+body.dark-mode .documentation-content h3 {
+    color: #20c997;
+}
+
+body.dark-mode .documentation-content h4 {
+    color: #f5c2c7;
+}
+
+body.dark-mode .documentation-content blockquote {
+    border-left-color: #86b7fe;
+    background-color: #343a40;
+}
+
+body.dark-mode .documentation-content code {
+    background-color: #343a40;
+    color: #f8f9fa;
+}
+
+body.dark-mode .documentation-content pre {
+    background-color: #343a40;
+    border-color: #495057;
+}
+
+body.dark-mode .documentation-content table th,
+body.dark-mode .documentation-content table td {
+    border-color: #495057;
+}
+
+body.dark-mode .documentation-content table th {
+    background-color: #343a40;
+}
+
+body.dark-mode .documentation-content table tr:nth-child(even) {
+    background-color: #2d3338;
+}
+
+body.dark-mode .documentation-content .highlight {
+    background-color: #664d03;
+    color: #fff;
+}
+
+body.dark-mode .documentation-content hr {
+    border-top-color: #495057;
+}
+
+/* Documentation navigation pills */
+.nav-pills .nav-link {
+    color: #495057;
+    background-color: transparent;
+    border: 1px solid transparent;
+    margin-bottom: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.nav-pills .nav-link:hover {
+    color: #0d6efd;
+    background-color: rgba(13, 110, 253, 0.1);
+    border-color: rgba(13, 110, 253, 0.25);
+}
+
+.nav-pills .nav-link.active {
+    color: #fff;
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+body.dark-mode .nav-pills .nav-link {
+    color: #adb5bd;
+    background-color: transparent;
+}
+
+body.dark-mode .nav-pills .nav-link:hover {
+    color: #86b7fe;
+    background-color: rgba(134, 183, 254, 0.1);
+    border-color: rgba(134, 183, 254, 0.25);
+}
+
+body.dark-mode .nav-pills .nav-link.active {
+    color: #000;
+    background-color: #86b7fe;
+    border-color: #86b7fe;
+}
+
+/* Excel Import Modal Styles */
+.excel-drop-zone {
+    border: 2px dashed #dee2e6;
+    border-radius: 0.375rem;
+    padding: 3rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.excel-drop-zone:hover {
+    border-color: #0d6efd;
+    background-color: rgba(13, 110, 253, 0.05);
+}
+
+.excel-drop-zone.dragover {
+    border-color: #0d6efd;
+    background-color: rgba(13, 110, 253, 0.1);
+    transform: scale(1.02);
+}
+
+.excel-drop-zone i {
+    color: #6c757d;
+    transition: color 0.3s ease;
+}
+
+.excel-drop-zone:hover i {
+    color: #0d6efd;
+}
+
+.excel-import-step {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.column-mapping-item {
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background-color: #f8f9fa;
+    border-radius: 0.375rem;
+    border: 1px solid #dee2e6;
+}
+
+.column-mapping-item label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.validation-row-error {
+    background-color: rgba(220, 53, 69, 0.1) !important;
+}
+
+.validation-row-warning {
+    background-color: rgba(255, 193, 7, 0.1) !important;
+}
+
+.validation-row-success {
+    background-color: rgba(25, 135, 84, 0.1) !important;
+}
+
+.import-progress-container {
+    margin-top: 1rem;
+}
+
+.import-progress {
+    height: 0.75rem;
+    border-radius: 0.375rem;
+    overflow: hidden;
+}
+
+.import-progress .progress-bar {
+    transition: width 0.3s ease;
+}
+
+/* Dark mode styles for Excel import */
+body.dark-mode .excel-drop-zone {
+    border-color: #495057;
+    background-color: #343a40;
+}
+
+body.dark-mode .excel-drop-zone:hover {
+    border-color: #86b7fe;
+    background-color: rgba(134, 183, 254, 0.1);
+}
+
+body.dark-mode .excel-drop-zone.dragover {
+    border-color: #86b7fe;
+    background-color: rgba(134, 183, 254, 0.2);
+}
+
+body.dark-mode .column-mapping-item {
+    background-color: #343a40;
+    border-color: #495057;
+}
+
+body.dark-mode .column-mapping-item label {
+    color: #f8f9fa;
+}
+
+body.dark-mode .validation-row-error {
+    background-color: rgba(220, 53, 69, 0.2) !important;
+}
+
+body.dark-mode .validation-row-warning {
+    background-color: rgba(255, 193, 7, 0.2) !important;
+}
+
+body.dark-mode .validation-row-success {
+    background-color: rgba(25, 135, 84, 0.2) !important;
+}
+
+/* Animation for step transitions */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Excel file type icons */
+.file-type-icon {
+    font-size: 1.2rem;
+    margin-right: 0.5rem;
+}
+
+.file-type-excel {
+    color: #217346;
+}
+
+.file-type-csv {
+    color: #0d6efd;
+}
+
+/* Import status indicators */
+.import-status-success {
+    color: #198754;
+}
+
+.import-status-error {
+    color: #dc3545;
+}
+
+.import-status-warning {
+    color: #ffc107;
+}
+
+.import-status-info {
+    color: #0dcaf0;
+}

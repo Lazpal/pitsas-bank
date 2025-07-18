@@ -3,7 +3,7 @@
 https://lazpal.github.io/pitsas-bank/app/index.html
 
 > Σύστημα διαχείρισης χρημάτων για κατασκηνώσεις - Ψηφιακή τράπεζα κατασκηνωτών
-
+1
 ![License](https://img.shields.io/badge/License-Custom-blue.svg)
 ![Electron](https://img.shields.io/badge/Electron-28.2.0-47848f?logo=electron)
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white)
@@ -26,7 +26,8 @@ https://lazpal.github.io/pitsas-bank/app/index.html
 
 ## 📚 Τεκμηρίωση
 
-- 📖 **[Release Notes](RELEASE-NOTES.md)** - Λεπτομέρειες έκδοσης και τεχνικές προδιαγραφές
+- � **[Οδηγός για Αρχάριους](BEGINNER-GUIDE.md)** - Βήμα προς βήμα οδηγός για νέους χρήστες
+- �📖 **[Release Notes](RELEASE-NOTES.md)** - Λεπτομέρειες έκδοσης και τεχνικές προδιαγραφές
 - 🔄 **[Auto Backup Info](AUTO_BACKUP_INFO.md)** - Οδηγίες αυτόματου backup συστήματος
 - 🎯 **[Focus Fix Guide](FOCUS_FIX_GUIDE.md)** - Οδηγίες για focus management και shortcuts
 - 📄 **[LICENSE](LICENSE)** - Άδεια χρήσης και όροι

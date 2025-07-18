@@ -1,19 +1,131 @@
 // Preload script για ασφαλή επικοινωνία μεταξύ main process και renderer
 const { contextBridge, ipcRenderer } = require('electron');
 
+// Security: Define allowed channels
+const validChannels = [
+  'save-auto-backup',
+  'load-auto-backup', 
+  'focus-main-window',
+  'restore-focus',
+  'app-ready',
+  'app-closing',
+  'read-documentation',
+  'select-excel-file',
+  'read-excel-file'
+];
+
+// Validate channel
+function isValidChannel(channel) {
+  return validChannels.includes(channel);
+}
+
 // Εκθέστε ασφαλείς APIs στο renderer process
 contextBridge.exposeInMainWorld('electronAPI', {
-  // Εδώ μπορούμε να προσθέσουμε APIs που χρειάζεται η εφαρμογή
+  // System info
   platform: process.platform,
-  versions: process.versions,
+  versions: {
+    node: process.versions.node,
+    chrome: process.versions.chrome,
+    electron: process.versions.electron
+  },
   
-  // Παράδειγμα API για μελλοντική χρήση
-  openDevTools: () => ipcRenderer.invoke('open-dev-tools'),
-  closeApp: () => ipcRenderer.invoke('close-app'),
+  // Enhanced Backup APIs με error handling
+  saveAutoBackup: async (backupData) => {
+    try {
+      if (!backupData) throw new Error('No backup data provided');
+      return await ipcRenderer.invoke('save-auto-backup', backupData);
+    } catch (error) {
+      console.error('Save auto backup error:', error);
+      return { success: false, error: error.message };
+    }
+  },
   
-  // Event listeners
-  onAppReady: (callback) => ipcRenderer.on('app-ready', callback),
-  removeAllListeners: (channel) => ipcRenderer.removeAllListeners(channel)
+  loadAutoBackup: async () => {
+    try {
+      return await ipcRenderer.invoke('load-auto-backup');
+    } catch (error) {
+      console.error('Load auto backup error:', error);
+      return null;
+    }
+  },
+  
+  // Enhanced Focus Management APIs με error handling
+  focusMainWindow: async () => {
+    try {
+      return await ipcRenderer.invoke('focus-main-window');
+    } catch (error) {
+      console.error('Focus main window error:', error);
+      return { success: false, error: error.message };
+    }
+  },
+  
+  restoreFocus: async () => {
+    try {
+      return await ipcRenderer.invoke('restore-focus');
+    } catch (error) {
+      console.error('Restore focus error:', error);
+      return { success: false, error: error.message };
+    }
+  },
+  
+  // Documentation APIs
+  readDocumentation: async (filename) => {
+    try {
+      if (!filename) throw new Error('No filename provided');
+      return await ipcRenderer.invoke('read-documentation', filename);
+    } catch (error) {
+      console.error('Read documentation error:', error);
+      return { success: false, error: error.message };
+    }
+  },
+  
+  // Excel Import APIs
+  selectExcelFile: async () => {
+    try {
+      return await ipcRenderer.invoke('select-excel-file');
+    } catch (error) {
+      console.error('Select Excel file error:', error);
+      return { success: false, error: error.message };
+    }
+  },
+  
+  readExcelFile: async (filePath) => {
+    try {
+      if (!filePath) throw new Error('No file path provided');
+      return await ipcRenderer.invoke('read-excel-file', filePath);
+    } catch (error) {
+      console.error('Read Excel file error:', error);
+      return { success: false, error: error.message };
+    }
+  },
+  
+  // Safe Event listeners
+  onAppReady: (callback) => {
+    if (typeof callback === 'function') {
+      ipcRenderer.on('app-ready', callback);
+    }
+  },
+  
+  onAppClosing: (callback) => {
+    if (typeof callback === 'function') {
+      ipcRenderer.on('app-closing', callback);
+    }
+  },
+  
+  removeAllListeners: (channel) => {
+    if (isValidChannel(channel)) {
+      ipcRenderer.removeAllListeners(channel);
+    }
+  }
 });
 
-console.log('Preload script loaded successfully');
+// Development mode detection
+const isDev = process.env.NODE_ENV === 'development' || process.defaultApp || 
+             /[\\/]electron-prebuilt[\\/]/.test(process.execPath) || 
+             /[\\/]electron[\\/]/.test(process.execPath);
+
+if (isDev) {
+  console.log('Preload script loaded successfully in development mode');
+} else {
+  console.log('Preload script loaded successfully in production mode');
+}

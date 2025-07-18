@@ -40,6 +40,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Μετανάστευση δεδομένων - εξασφάλιση ότι όλα τα παιδιά έχουν τα νέα πεδία
     migrateChildrenData();
     
+    // Global state tracking
+    let currentView = 'dashboard';
+    
     // DOM Elements
     const loginForm = document.getElementById('login-form');
     const loginContainer = document.getElementById('login-container');
@@ -80,11 +83,59 @@ document.addEventListener('DOMContentLoaded', function() {
     const settingsModal = new bootstrap.Modal(document.getElementById('settingsModal'));
     const keyboardShortcutsModal = new bootstrap.Modal(document.getElementById('keyboardShortcutsModal'));
     const advancedSearchModal = new bootstrap.Modal(document.getElementById('advancedSearchModal'));
+    const documentationModal = new bootstrap.Modal(document.getElementById('documentationModal'));
+    const documentationWindowModal = new bootstrap.Modal(document.getElementById('documentationWindowModal'));
+    const excelImportModal = new bootstrap.Modal(document.getElementById('excelImportModal'));
     
     // Add event listener to clean up transaction modal classes when hidden
     document.getElementById('transactionModal').addEventListener('hidden.bs.modal', function () {
         const modalContent = this.querySelector('.modal-content');
         modalContent.classList.remove('modal-deposit', 'modal-withdraw');
+    });
+    
+    // Add Enter key functionality to modals
+    // For Add Child Modal
+    document.getElementById('addChildModal').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            // Don't trigger if we're in a textarea (for notes)
+            if (e.target.tagName.toLowerCase() !== 'textarea') {
+                saveChildBtn.click();
+            }
+        }
+    });
+    
+    // For Transaction Modal
+    document.getElementById('transactionModal').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            // Don't trigger if we're in a textarea (for notes)
+            if (e.target.tagName.toLowerCase() !== 'textarea') {
+                saveTransactionBtn.click();
+            }
+        }
+    });
+    
+    // For Limit Override Modal
+    document.getElementById('limitOverrideModal').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            // Don't trigger if we're in a textarea (for reason)
+            if (e.target.tagName.toLowerCase() !== 'textarea') {
+                // Only trigger if the confirm checkbox is checked
+                if (document.getElementById('confirm-override').checked) {
+                    confirmOverrideBtn.click();
+                }
+            }
+        }
+    });
+    
+    // For Login Form (already has submit event but let's ensure Enter works)
+    document.getElementById('login-container').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            loginForm.dispatchEvent(new Event('submit'));
+        }
     });
     
     // Export buttons
@@ -190,6 +241,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Navigation functionality - Enhanced with breadcrumbs
     dashboardLink.addEventListener('click', function(e) {
         e.preventDefault();
+        currentView = 'dashboard';
         showView(dashboardView);
         setActiveLink(dashboardLink);
         loadDashboard();
@@ -198,6 +250,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     childrenLink.addEventListener('click', function(e) {
         e.preventDefault();
+        currentView = 'children';
         showView(childrenView);
         setActiveLink(childrenLink);
         loadChildren();
@@ -206,6 +259,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     transactionsLink.addEventListener('click', function(e) {
         e.preventDefault();
+        currentView = 'transactions';
         showView(transactionsView);
         setActiveLink(transactionsLink);
         loadTransactions();
@@ -214,6 +268,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     statisticsLink.addEventListener('click', function(e) {
         e.preventDefault();
+        currentView = 'statistics';
         showView(statisticsView);
         setActiveLink(statisticsLink);
         loadStatistics();
@@ -1195,6 +1250,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function showChildHistory(childId) {
         // Set active tab to transactions
+        currentView = 'transactions';
         showView(transactionsView);
         setActiveLink(transactionsLink);
         
@@ -1277,6 +1333,24 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Show receipt modal
         receiptModal.show();
+        
+        // Add Enter key listener for closing receipt
+        const receiptEnterHandler = function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                receiptModal.hide();
+                document.removeEventListener('keydown', receiptEnterHandler);
+            }
+        };
+        
+        // Add the event listener when modal is shown
+        document.addEventListener('keydown', receiptEnterHandler);
+        
+        // Remove event listener when modal is hidden
+        const receiptModalElement = document.getElementById('receiptModal');
+        receiptModalElement.addEventListener('hidden.bs.modal', function() {
+            document.removeEventListener('keydown', receiptEnterHandler);
+        }, { once: true });
     }
     
     function showIdCard(childId) {
@@ -1296,6 +1370,24 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Show ID card modal
         idCardModal.show();
+        
+        // Add Enter key listener for closing ID card
+        const idCardEnterHandler = function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                idCardModal.hide();
+                document.removeEventListener('keydown', idCardEnterHandler);
+            }
+        };
+        
+        // Add the event listener when modal is shown
+        document.addEventListener('keydown', idCardEnterHandler);
+        
+        // Remove event listener when modal is hidden
+        const idCardModalElement = document.getElementById('idCardModal');
+        idCardModalElement.addEventListener('hidden.bs.modal', function() {
+            document.removeEventListener('keydown', idCardEnterHandler);
+        }, { once: true });
     }
     
     function loadStatistics() {
@@ -1735,8 +1827,33 @@ document.addEventListener('DOMContentLoaded', function() {
         window.print();
         document.body.innerHTML = originalContents;
         
-        // Reinitialize Bootstrap components and event listeners
-        location.reload();
+        // Reinitialize Bootstrap components without page reload
+        setTimeout(() => {
+            // Reinitialize Bootstrap tooltips and popovers
+            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+            const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+            
+            const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
+            const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
+            
+            // Refresh current view
+            if (currentView === 'dashboard') {
+                showView(dashboardView);
+                setActiveLink(dashboardLink);
+            } else if (currentView === 'children') {
+                showView(childrenView);
+                setActiveLink(childrenLink);
+                renderChildren();
+            } else if (currentView === 'transactions') {
+                showView(transactionsView);
+                setActiveLink(transactionsLink);
+                renderTransactions();
+            } else if (currentView === 'statistics') {
+                showView(statisticsView);
+                setActiveLink(statisticsLink);
+                generateStatistics();
+            }
+        }, 100);
     }
     
     function createBackup() {
@@ -1795,9 +1912,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     showNotification('Τα δεδομένα επαναφέρθηκαν επιτυχώς!', 'success');
                     
-                    // Reload the page
+                    // Refresh views instead of reloading the page
                     setTimeout(() => {
-                        location.reload();
+                        // Refresh all views to show restored data
+                        renderChildren();
+                        renderTransactions(); 
+                        generateStatistics();
+                        
+                        // If we're on dashboard, refresh it too
+                        if (currentView === 'dashboard') {
+                            showView(dashboardView);
+                        }
                     }, 1500);
                 }
             } catch (error) {
@@ -1807,6 +1932,187 @@ document.addEventListener('DOMContentLoaded', function() {
         reader.readAsText(file);
     }
     
+    // Αυτόματο backup σύστημα
+    function createAutoBackup() {
+        try {
+            const backup = {
+                children: safeGetFromStorage('pitsasChildren', []),
+                transactions: safeGetFromStorage('pitsasTransactions', []),
+                settings: safeGetFromStorage('pitsasSettings', {}),
+                timestamp: new Date().toISOString(),
+                autoBackup: true
+            };
+            
+            const backupString = JSON.stringify(backup, null, 2);
+            
+            // Χρήση του Electron API για αποθήκευση αρχείου - ΣΙΩΠΗΛΑ
+            if (window.electronAPI && window.electronAPI.saveAutoBackup) {
+                window.electronAPI.saveAutoBackup(backupString)
+                    .then(() => {
+                        // Σιωπηλή επιτυχία - δεν χρειάζεται μήνυμα
+                    })
+                    .catch(error => {
+                        // Σιωπηλό error
+                    });
+            } else {
+                // Fallback για browser - αποθήκευση στο localStorage - ΣΙΩΠΗΛΑ
+                localStorage.setItem('pitsasAutoBackup', backupString);
+                localStorage.setItem('pitsasAutoBackupDate', new Date().toISOString());
+            }
+        } catch (error) {
+            // Σιωπηλό error handling
+        }
+    }
+    
+    function loadAutoBackup() {
+        try {
+            if (window.electronAPI && window.electronAPI.loadAutoBackup) {
+                // Φόρτωση από αρχείο μέσω Electron - ΣΙΩΠΗΛΑ
+                window.electronAPI.loadAutoBackup()
+                    .then(backupData => {
+                        if (backupData) {
+                            // Αποθήκευση σε μεταβλητή για μελλοντική χρήση
+                            window.availableAutoBackup = backupData;
+                        }
+                    })
+                    .catch(error => {
+                        // Σιωπηλό error - δεν χρειάζεται να ενημερώσουμε τον χρήστη
+                    });
+            } else {
+                // Fallback για browser - ΣΙΩΠΗΛΑ
+                const backupString = localStorage.getItem('pitsasAutoBackup');
+                if (backupString) {
+                    window.availableAutoBackup = backupString;
+                }
+            }
+        } catch (error) {
+            // Σιωπηλό error handling
+        }
+    }
+    
+    function processAutoBackup(backupData) {
+        try {
+            const backup = typeof backupData === 'string' ? JSON.parse(backupData) : backupData;
+            
+            if (!backup.autoBackup) return; // Δεν είναι αυτόματο backup
+            
+            const backupDate = new Date(backup.timestamp);
+            const now = new Date();
+            const diffHours = (now - backupDate) / (1000 * 60 * 60);
+            
+            // Εάν το backup είναι νεότερο από 24 ώρες, ρωτάμε τον χρήστη
+            if (diffHours < 24) {
+                const backupTime = backupDate.toLocaleString('el-GR');
+                if (confirm(`Βρέθηκε αυτόματο backup από ${backupTime}.\nΘέλετε να επαναφέρετε τα δεδομένα;`)) {
+                    // Επαναφορά δεδομένων
+                    if (backup.children) safeSetToStorage('pitsasChildren', backup.children);
+                    if (backup.transactions) safeSetToStorage('pitsasTransactions', backup.transactions);
+                    if (backup.settings) safeSetToStorage('pitsasSettings', backup.settings);
+                    
+                    showNotification('Τα δεδομένα επαναφέρθηκαν από το αυτόματο backup!', 'success');
+                    
+                    // Refresh views instead of reloading the page
+                    setTimeout(() => {
+                        // Refresh all views to show restored data
+                        renderChildren();
+                        renderTransactions(); 
+                        generateStatistics();
+                        
+                        // If we're on dashboard, refresh it too
+                        if (currentView === 'dashboard') {
+                            showView(dashboardView);
+                        }
+                    }, 1500);
+                }
+            }
+        } catch (error) {
+            console.error('❌ Σφάλμα κατά την επεξεργασία του αυτόματου backup:', error);
+        }
+    }
+    
+    // Χειροκίνητη εμφάνιση backup για recovery
+    function showEmergencyBackupInfo() {
+        const hasBackup = window.availableAutoBackup;
+        let message = '🔍 Πληροφορίες Αυτόματου Backup:\n\n';
+        
+        if (hasBackup) {
+            try {
+                const backup = typeof hasBackup === 'string' ? JSON.parse(hasBackup) : hasBackup;
+                const backupDate = new Date(backup.timestamp).toLocaleString('el-GR');
+                const childrenCount = backup.children ? backup.children.length : 0;
+                const transactionsCount = backup.transactions ? backup.transactions.length : 0;
+                
+                message += `✅ Διαθέσιμο Backup:\n`;
+                message += `📅 Ημερομηνία: ${backupDate}\n`;
+                message += `👶 Παιδιά: ${childrenCount}\n`;
+                message += `💳 Συναλλαγές: ${transactionsCount}\n\n`;
+                message += `Θέλετε να επαναφέρετε αυτά τα δεδομένα;`;
+                
+                if (confirm(message)) {
+                    processAutoBackup(hasBackup);
+                }
+            } catch (error) {
+                message += `❌ Σφάλμα ανάλυσης backup`;
+                alert(message);
+            }
+        } else {
+            message += `❌ Δεν βρέθηκε διαθέσιμο αυτόματο backup.\n\n`;
+            
+            if (window.electronAPI) {
+                const userDataPath = require('electron').app?.getPath('userData') || '%APPDATA%/pitsas-camp-bank';
+                message += `📁 Τοποθεσία αρχείου:\n${userDataPath}/pitsas_auto_backup.json\n\n`;
+            } else {
+                message += `💾 Backup αποθηκεύεται στο localStorage του browser.\n\n`;
+            }
+            
+            message += `💡 Αν νομίζετε ότι έχετε χάσει δεδομένα:\n`;
+            message += `1. Ελέγξτε την παραπάνω τοποθεσία για το αρχείο backup\n`;
+            message += `2. Χρησιμοποιήστε το κανονικό backup/restore από το μενού\n`;
+            message += `3. Επικοινωνήστε με υποστήριξη`;
+            
+            alert(message);
+        }
+    }
+    
+    // Αρχικοποίηση αυτόματου backup συστήματος
+    function initializeAutoBackup() {
+        // Φόρτωση αυτόματου backup κατά την εκκίνηση - ΣΙΩΠΗΛΑ
+        loadAutoBackup();
+        
+        // Initialize Excel import events once at startup
+        initializeExcelImportEvents();
+        
+        // Αυτόματο backup κάθε 30 λεπτά - ΣΙΩΠΗΛΑ
+        setInterval(createAutoBackup, 30 * 60 * 1000);
+        
+        // Αυτόματο backup όταν κλείνει η εφαρμογή - ΣΙΩΠΗΛΑ
+        window.addEventListener('beforeunload', function(e) {
+            createAutoBackup();
+        });
+        
+        // Ακρόαση σήματος κλεισίματος από το Electron - ΣΙΩΠΗΛΑ
+        if (window.electronAPI && window.electronAPI.onAppClosing) {
+            window.electronAPI.onAppClosing(() => {
+                createAutoBackup();
+            });
+        }
+        
+        // Αυτόματο backup όταν κρύβεται η εφαρμογή - ΣΙΩΠΗΛΑ
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                createAutoBackup();
+            }
+        });
+        
+        // Αυτόματο backup όταν χάνει το focus η εφαρμογή - ΣΙΩΠΗΛΑ
+        window.addEventListener('blur', function() {
+            createAutoBackup();
+        });
+        
+        // Καθολική συνάρτηση για emergency backup info
+        window.showEmergencyBackup = showEmergencyBackupInfo;
+    }
+
     function toggleDarkMode() {
         const settings = safeGetFromStorage('pitsasSettings', {});
         settings.darkMode = !settings.darkMode;
@@ -1885,7 +2191,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const notificationContainer = document.getElementById('notification-container');
         
         const notification = document.createElement('div');
-        notification.className = `toast align-items-center text-white bg-${type} border-0`;
+        notification.className = `toast align-items-center text-white bg-${type} border-0 notification-slide-in`;
         notification.setAttribute('role', 'alert');
         notification.setAttribute('aria-live', 'assertive');
         notification.setAttribute('aria-atomic', 'true');
@@ -1904,7 +2210,7 @@ document.addEventListener('DOMContentLoaded', function() {
         notification.innerHTML = `
             <div class="d-flex">
                 <div class="toast-body">
-                    <i class="bi ${icon} me-2"></i>
+                    <i class="bi ${icon} me-2 notification-icon-bounce"></i>
                     ${message}
                 </div>
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
@@ -2134,6 +2440,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const navExportStats = document.getElementById('nav-export-stats');
     const navResetLimits = document.getElementById('nav-reset-limits');
     const navSettings = document.getElementById('nav-settings');
+    const navDocumentation = document.getElementById('nav-documentation');
+    const navBeginnerGuide = document.getElementById('nav-beginner-guide');
+    const navShortcuts = document.getElementById('nav-shortcuts');
+    const navExcelImport = document.getElementById('nav-excel-import');
     
     if (homeLink) {
         homeLink.addEventListener('click', function(e) {
@@ -2210,15 +2520,62 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    // Documentation Event Listeners
+    if (navDocumentation) {
+        navDocumentation.addEventListener('click', function(e) {
+            e.preventDefault();
+            showDocumentationModal();
+        });
+    }
+    
+    if (navBeginnerGuide) {
+        navBeginnerGuide.addEventListener('click', function(e) {
+            e.preventDefault();
+            openDocumentationWindow('BEGINNER-GUIDE.md');
+        });
+    }
+    
+    if (navShortcuts) {
+        navShortcuts.addEventListener('click', function(e) {
+            e.preventDefault();
+            keyboardShortcutsModal.show();
+        });
+    }
+    
+    // Excel Import Event Listener
+    if (navExcelImport) {
+        navExcelImport.addEventListener('click', function(e) {
+            e.preventDefault();
+            showExcelImportModal();
+        });
+    }
+    
     // New Tools Functions
     
-    // Quick Search functionality
+    // Quick Search functionality with debouncing for better performance
+    let searchTimeout;
     document.getElementById('quick-search-input').addEventListener('input', function() {
         const searchTerm = this.value.toLowerCase();
         const resultsContainer = document.getElementById('quick-search-results');
         
+        // Clear previous timeout
+        clearTimeout(searchTimeout);
+        
+        // Add loading animation
+        if (searchTerm.length >= 2) {
+            resultsContainer.innerHTML = '<div class="text-center p-3"><div class="spinner-border spinner-border-sm text-primary" role="status"></div> Αναζήτηση...</div>';
+        }
+        
+        // Debounce search to avoid excessive calls
+        searchTimeout = setTimeout(() => {
+            performQuickSearch(searchTerm, resultsContainer);
+        }, 300);
+    });
+    
+    // Separate function for performing search with animations
+    function performQuickSearch(searchTerm, resultsContainer) {
         if (searchTerm.length < 2) {
-            resultsContainer.innerHTML = '<div class="text-muted text-center p-3">Πληκτρολογήστε τουλάχιστον 2 χαρακτήρες</div>';
+            resultsContainer.innerHTML = '<div class="text-muted text-center p-3 fade-in">Πληκτρολογήστε τουλάχιστον 2 χαρακτήρες</div>';
             return;
         }
         
@@ -2230,27 +2587,28 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         if (filteredChildren.length === 0) {
-            resultsContainer.innerHTML = '<div class="text-muted text-center p-3">Δεν βρέθηκαν αποτελέσματα</div>';
+            resultsContainer.innerHTML = '<div class="text-muted text-center p-3 fade-in">Δεν βρέθηκαν αποτελέσματα</div>';
             return;
         }
         
-        resultsContainer.innerHTML = filteredChildren.map(child => `
-            <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+        // Add animation classes to results
+        resultsContainer.innerHTML = filteredChildren.map((child, index) => `
+            <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center search-result-item" style="animation-delay: ${index * 0.05}s">
                 <div>
                     <h6 class="mb-1">${child.firstName} ${child.lastName}</h6>
                     <small class="text-muted">ID: ${child.campId || 'N/A'} | Ομάδα: ${child.group} | Υπόλοιπο: ${child.balance.toFixed(2)}€</small>
                 </div>
                 <div class="btn-group btn-group-sm">
-                    <button class="btn btn-outline-success" onclick="quickDeposit('${child.id}')">
+                    <button class="btn btn-outline-success btn-animated" onclick="quickDeposit('${child.id}')">
                         <i class="bi bi-cash-coin"></i>
                     </button>
-                    <button class="btn btn-outline-warning" onclick="quickWithdraw('${child.id}')">
+                    <button class="btn btn-outline-warning btn-animated" onclick="quickWithdraw('${child.id}')">
                         <i class="bi bi-cash"></i>
                     </button>
                 </div>
             </div>
         `).join('');
-    });
+    }
     
     // Quick transaction functions
     window.quickDeposit = function(childId) {
@@ -2640,6 +2998,110 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+    // Initialize animations and performance optimizations
+    function initializeAnimations() {
+        // Add fade-in to main containers
+        const containers = document.querySelectorAll('.container, .card, .modal-content');
+        containers.forEach((container, index) => {
+            container.style.animationDelay = `${index * 0.1}s`;
+            container.classList.add('fade-in');
+        });
+        
+        // Add hover effects to dashboard cards
+        const dashboardCards = document.querySelectorAll('.dashboard-card');
+        dashboardCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-2px)';
+            });
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+        
+        // Optimize animations for performance
+        if (window.DeviceMotionEvent && 'ontouchstart' in window) {
+            // Reduce animations on mobile devices
+            document.body.classList.add('mobile-optimized');
+        }
+    }
+    
+    // Enhanced modal keyboard navigation
+    function initializeModalKeyboardSupport() {
+        // Add Enter key support for all modals
+        document.addEventListener('keydown', function(e) {
+            // Don't trigger if user is typing in an input field
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+                return;
+            }
+            
+            const openModal = document.querySelector('.modal.show');
+            if (!openModal) return;
+            
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                
+                // Handle specific modals
+                const modalId = openModal.id;
+                
+                switch(modalId) {
+                    case 'receiptModal':
+                    case 'idCardModal':
+                        // Close these modals with Enter
+                        const modalInstance = bootstrap.Modal.getInstance(openModal);
+                        if (modalInstance) modalInstance.hide();
+                        break;
+                        
+                    case 'transactionModal':
+                        // Submit transaction with Enter
+                        const submitBtn = document.getElementById('save-transaction-btn');
+                        if (submitBtn && !submitBtn.disabled) {
+                            submitBtn.click();
+                        }
+                        break;
+                        
+                    case 'addChildModal':
+                        // Submit child form with Enter
+                        const saveChildBtn = document.getElementById('save-child-btn');
+                        if (saveChildBtn && !saveChildBtn.disabled) {
+                            saveChildBtn.click();
+                        }
+                        break;
+                        
+                    default:
+                        // For other modals, find the primary button and click it
+                        const primaryBtn = openModal.querySelector('.btn-primary:not(:disabled)');
+                        if (primaryBtn) {
+                            primaryBtn.click();
+                        }
+                        break;
+                }
+            }
+        });
+        
+        // Fix focus issues με modals
+        document.addEventListener('shown.bs.modal', function(e) {
+            // Όταν ανοίγει modal, focus στο πρώτο input
+            const modal = e.target;
+            const firstInput = modal.querySelector('input:not([type="hidden"]), textarea, select');
+            if (firstInput) {
+                setTimeout(() => {
+                    firstInput.focus();
+                }, 100);
+            }
+        });
+        
+        document.addEventListener('hidden.bs.modal', function(e) {
+            // Όταν κλείνει modal, επαναφορά focus στο body
+            setTimeout(() => {
+                document.body.focus();
+                // Εάν είμαστε σε Electron, focus στο webContents
+                if (window.electronAPI) {
+                    window.focus();
+                }
+            }, 100);
+        });
+    }
+    
     // Initialize breadcrumbs
     updateBreadcrumbs('dashboard');
     
@@ -2654,6 +3116,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize smart alerts
     initializeSmartAlerts();
+    
+    // Initialize animations
+    initializeAnimations();
+    
+    // Initialize modal keyboard support
+    initializeModalKeyboardSupport();
     
     // Function to initialize dark mode on app load
     function initializeDarkMode() {
@@ -2738,6 +3206,14 @@ document.addEventListener('DOMContentLoaded', function() {
                             const advSearchInput = document.getElementById('adv-search-text');
                             if (advSearchInput) advSearchInput.focus();
                         }, 100);
+                        break;
+                    case 'r':
+                        // Ctrl+Shift+R για Emergency Backup Recovery
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (typeof showEmergencyBackupInfo === 'function') {
+                            showEmergencyBackupInfo();
+                        }
                         break;
                 }
             }
@@ -2891,12 +3367,12 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const alertContainer = document.getElementById('smart-alerts-container');
         const alert = document.createElement('div');
-        alert.className = `alert alert-${type} alert-dismissible fade show shadow-sm smart-alert`;
+        alert.className = `alert alert-${type} alert-dismissible fade show shadow-sm smart-alert smart-alert-slide-in`;
         alert.setAttribute('data-alert-id', alertId);
         
         alert.innerHTML = `
             <div class="d-flex align-items-center">
-                <i class="bi bi-lightbulb me-2"></i>
+                <i class="bi bi-lightbulb me-2 smart-alert-pulse"></i>
                 <div>
                     <strong>${title}</strong><br>
                     <small>${message}</small>
@@ -3206,4 +3682,1013 @@ document.addEventListener('DOMContentLoaded', function() {
             prepareTransactionModal('withdraw', childId);
         }, 300);
     };
+    
+    // Αρχικοποίηση αυτόματου backup συστήματος
+    initializeAutoBackup();
+    
+    // Fix για focus issues σε Electron - Enhanced version
+    function initializeFocusFixes() {
+        console.log('Αρχικοποίηση enhanced focus fixes...');
+        
+        // Γενικός focus fix για Electron - πιο αγρεσσικός
+        window.addEventListener('click', function(e) {
+            setTimeout(() => {
+                if (window.electronAPI && window.electronAPI.focusMainWindow) {
+                    window.electronAPI.focusMainWindow().catch(() => {
+                        window.focus();
+                        document.body.focus();
+                    });
+                }
+            }, 10);
+        });
+        
+        // Enhanced keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            // Tab handling με επιπλέον έλεγχο
+            if (e.key === 'Tab') {
+                setTimeout(() => {
+                    if (window.electronAPI) {
+                        window.electronAPI.focusMainWindow().catch(() => {
+                            window.focus();
+                        });
+                    }
+                    
+                    // Εάν δεν υπάρχει focused element, focus το body
+                    if (!document.activeElement || document.activeElement === document.body) {
+                        const inputs = document.querySelectorAll('input:not([type="hidden"]), textarea, select');
+                        for (let input of inputs) {
+                            if (input.offsetParent !== null && !input.disabled) {
+                                input.focus();
+                                break;
+                            }
+                        }
+                    }
+                }, 50);
+            }
+            
+            // Emergency focus restore με Ctrl+Alt+F
+            if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'f') {
+                e.preventDefault();
+                console.log('Emergency focus restore activated!');
+                
+                // Multiple fallbacks
+                if (window.electronAPI && window.electronAPI.restoreFocus) {
+                    window.electronAPI.restoreFocus().catch(err => {
+                        console.log('Emergency restore focus failed:', err.message);
+                    });
+                }
+                if (window.electronAPI && window.electronAPI.focusMainWindow) {
+                    window.electronAPI.focusMainWindow().catch(err => {
+                        console.log('Emergency focus main window failed:', err.message);
+                    });
+                }
+                
+                window.focus();
+                document.body.focus();
+                
+                // Focus σε κάποιο input
+                const searchInput = document.getElementById('searchInput');
+                if (searchInput && searchInput.style.display !== 'none') {
+                    searchInput.focus();
+                } else {
+                    const inputs = document.querySelectorAll('input:not([type="hidden"]), textarea');
+                    for (let input of inputs) {
+                        if (input.offsetParent !== null && !input.disabled) {
+                            input.focus();
+                            break;
+                        }
+                    }
+                }
+                
+                showNotification('Focus επαναφέρθηκε με force!', 'success');
+            }
+            
+            // F1 - Help/Documentation shortcut
+            if (e.key === 'F1') {
+                e.preventDefault();
+                showDocumentationModal();
+                return;
+            }
+            
+            // F2 - Beginner Guide shortcut  
+            if (e.key === 'F2') {
+                e.preventDefault();
+                openDocumentationWindow('BEGINNER-GUIDE.md');
+                return;
+            }
+            
+            // Escape key handling
+            if (e.key === 'Escape') {
+                setTimeout(() => {
+                    if (window.electronAPI) {
+                        window.electronAPI.focusMainWindow().catch(err => {
+                            console.log('Escape focus failed:', err.message);
+                        });
+                    }
+                    window.focus();
+                }, 50);
+            }
+        });
+        
+        // Window focus/blur events με enhanced handling
+        window.addEventListener('focus', function() {
+            console.log('Window gained focus');
+            if (window.electronAPI && window.electronAPI.focusMainWindow) {
+                window.electronAPI.focusMainWindow().catch(err => {
+                    console.log('Window focus event failed:', err.message);
+                });
+            }
+        });
+        
+        window.addEventListener('blur', function() {
+            console.log('Window lost focus');
+            // Αγρεσσική επαναφορά focus μετά από blur
+            setTimeout(() => {
+                const modalsOpen = document.querySelector('.modal.show');
+                if (!modalsOpen && window.electronAPI) {
+                    window.electronAPI.focusMainWindow().catch(() => {
+                        window.focus();
+                    });
+                }
+            }, 300);
+        });
+        
+        // Modal handling με enhanced support
+        document.addEventListener('show.bs.modal', function(e) {
+            console.log('Modal opening:', e.target.id);
+            setTimeout(() => {
+                const modal = e.target;
+                if (modal) {
+                    modal.focus();
+                    // Focus στο πρώτο focusable element
+                    const focusable = modal.querySelector('input, textarea, select, button:not([disabled])');
+                    if (focusable) {
+                        focusable.focus();
+                    }
+                }
+                
+                if (window.electronAPI) {
+                    window.electronAPI.focusMainWindow().catch(err => {
+                        console.log('Modal show focus failed:', err.message);
+                    });
+                }
+            }, 150);
+        });
+        
+        document.addEventListener('hidden.bs.modal', function(e) {
+            console.log('Modal closed:', e.target.id);
+            setTimeout(() => {
+                if (window.electronAPI) {
+                    window.electronAPI.restoreFocus().catch(err => {
+                        console.log('Modal hidden restore focus failed:', err.message);
+                    });
+                    window.electronAPI.focusMainWindow().catch(err => {
+                        console.log('Modal hidden focus main window failed:', err.message);
+                    });
+                }
+                
+                window.focus();
+                document.body.focus();
+                
+                // Focus restoration στο search input αν είναι ορατό
+                const searchInput = document.getElementById('searchInput');
+                if (searchInput && searchInput.style.display !== 'none' && !searchInput.disabled) {
+                    searchInput.focus();
+                } else {
+                    // Focus σε κάποιο άλλο input
+                    const inputs = document.querySelectorAll('input:not([type="hidden"]), textarea');
+                    for (let input of inputs) {
+                        if (input.offsetParent !== null && !input.disabled) {
+                            input.focus();
+                            break;
+                        }
+                    }
+                }
+            }, 200);
+        });
+        
+        // Periodic focus check - πιο συχνός έλεγχος
+        setInterval(() => {
+            const hasFocus = document.hasFocus();
+            const modalsOpen = document.querySelector('.modal.show');
+            
+            if (!hasFocus && !modalsOpen && window.electronAPI) {
+                console.log('Periodic focus restore attempt');
+                window.electronAPI.restoreFocus().catch(() => {
+                    window.focus();
+                    document.body.focus();
+                });
+            }
+        }, 5000); // Κάθε 5 δευτερόλεπτα
+        
+        // Document ready focus restoration
+        if (document.readyState === 'complete') {
+            setTimeout(() => {
+                if (window.electronAPI) {
+                    window.electronAPI.focusMainWindow().catch(err => {
+                        console.log('Document ready focus failed:', err.message);
+                    });
+                }
+                window.focus();
+            }, 100);
+        }
+    }
+    
+    // Αρχικοποίηση focus fixes
+    initializeFocusFixes();
+    
+    // ==================== DOCUMENTATION FUNCTIONS ====================
+    
+    // Simple markdown to HTML converter
+    function convertMarkdownToHtml(markdown) {
+        let html = markdown;
+        
+        // Escape HTML entities first
+        html = html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        
+        // Headers
+        html = html.replace(/^# (.*$)/gm, '<h1>$1</h1>');
+        html = html.replace(/^## (.*$)/gm, '<h2>$1</h2>');
+        html = html.replace(/^### (.*$)/gm, '<h3>$1</h3>');
+        html = html.replace(/^#### (.*$)/gm, '<h4>$1</h4>');
+        html = html.replace(/^##### (.*$)/gm, '<h5>$1</h5>');
+        html = html.replace(/^###### (.*$)/gm, '<h6>$1</h6>');
+        
+        // Bold and italic
+        html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+        
+        // Links
+        html = html.replace(/\[([^\]]+)\]\(([^\)]+)\)/g, '<a href="$2" class="text-decoration-none" target="_blank">$1 <i class="bi bi-box-arrow-up-right"></i></a>');
+        
+        // Code blocks (multi-line)
+        html = html.replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre class="bg-light p-3 rounded"><code>$2</code></pre>');
+        html = html.replace(/```\n([\s\S]*?)```/g, '<pre class="bg-light p-3 rounded"><code>$1</code></pre>');
+        
+        // Inline code
+        html = html.replace(/`([^`]+)`/g, '<code class="bg-light px-1 rounded">$1</code>');
+        
+        // Blockquotes
+        html = html.replace(/^&gt; (.*)$/gm, '<blockquote class="blockquote ps-3 border-start border-3 border-primary">$1</blockquote>');
+        
+        // Lists - ordered and unordered
+        html = html.replace(/^\d+\. (.*)$/gm, '<li>$1</li>');
+        html = html.replace(/^- (.*)$/gm, '<li>$1</li>');
+        
+        // Wrap consecutive list items in ul/ol
+        html = html.replace(/(<li>.*?<\/li>\s*)+/g, function(match) {
+            return '<ul class="list-unstyled">' + match + '</ul>';
+        });
+        
+        // Tables (improved)
+        html = html.replace(/\|([^|]+)\|/g, function(match, content) {
+            return '<td class="border px-2 py-1">' + content.trim() + '</td>';
+        });
+        html = html.replace(/(<td.*?<\/td>)+/g, function(match) {
+            return '<tr>' + match + '</tr>';
+        });
+        html = html.replace(/(<tr>.*?<\/tr>)+/g, function(match) {
+            return '<table class="table table-bordered table-sm">' + match + '</table>';
+        });
+        
+        // Horizontal rules
+        html = html.replace(/^---$/gm, '<hr class="my-4">');
+        
+        // Emojis and special characters
+        html = html.replace(/:\w+:/g, function(match) {
+            const emojiMap = {
+                ':checkmark:': '✅',
+                ':x:': '❌',
+                ':warning:': '⚠️',
+                ':info:': 'ℹ️',
+                ':bulb:': '💡',
+                ':rocket:': '🚀',
+                ':gear:': '⚙️',
+                ':book:': '📚',
+                ':computer:': '💻',
+                ':mobile:': '📱'
+            };
+            return emojiMap[match] || match;
+        });
+        
+        // Break lines into paragraphs
+        html = html.replace(/\n\n+/g, '</p><p>');
+        html = html.replace(/\n/g, '<br>');
+        
+        // Wrap in paragraph tags
+        html = '<p>' + html + '</p>';
+        
+        // Clean up empty paragraphs and fix structure
+        html = html.replace(/<p><\/p>/g, '');
+        html = html.replace(/<p><br><\/p>/g, '');
+        html = html.replace(/<p>(<h[1-6]>.*?<\/h[1-6]>)<\/p>/g, '$1');
+        html = html.replace(/<p>(<ul>.*?<\/ul>)<\/p>/g, '$1');
+        html = html.replace(/<p>(<ol>.*?<\/ol>)<\/p>/g, '$1');
+        html = html.replace(/<p>(<table>.*?<\/table>)<\/p>/g, '$1');
+        html = html.replace(/<p>(<pre>.*?<\/pre>)<\/p>/g, '$1');
+        html = html.replace(/<p>(<blockquote>.*?<\/blockquote>)<\/p>/g, '$1');
+        html = html.replace(/<p>(<hr[^>]*>)<\/p>/g, '$1');
+        
+        // Add Bootstrap classes for better styling
+        html = html.replace(/<table>/g, '<table class="table table-striped table-hover">');
+        html = html.replace(/<blockquote>/g, '<blockquote class="blockquote border-start border-3 border-primary ps-3 my-3">');
+        html = html.replace(/<code>/g, '<code class="text-primary bg-light px-1 rounded">');
+        
+        return html;
+    }
+    
+    // Load and display documentation
+    async function loadDocumentation(filename, targetElementId) {
+        const targetElement = document.getElementById(targetElementId);
+        
+        if (!targetElement) {
+            console.error(`Target element ${targetElementId} not found`);
+            return;
+        }
+        
+        try {
+            // Show loading
+            targetElement.innerHTML = `
+                <div class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Φόρτωση...</span>
+                    </div>
+                    <p class="mt-2">Φόρτωση ${filename}...</p>
+                </div>
+            `;
+            
+            // Read the file
+            const result = await window.electronAPI.readDocumentation(filename);
+            
+            if (result.success) {
+                // Convert markdown to HTML
+                const htmlContent = convertMarkdownToHtml(result.content);
+                targetElement.innerHTML = htmlContent;
+                
+                // Add smooth fade-in animation
+                targetElement.style.opacity = '0';
+                setTimeout(() => {
+                    targetElement.style.transition = 'opacity 0.5s ease-in-out';
+                    targetElement.style.opacity = '1';
+                }, 100);
+            } else {
+                targetElement.innerHTML = `
+                    <div class="alert alert-danger">
+                        <h6><i class="bi bi-exclamation-triangle me-2"></i>Σφάλμα Φόρτωσης</h6>
+                        <p>Δεν ήταν δυνατή η φόρτωση του αρχείου <strong>${filename}</strong>.</p>
+                        <p class="mb-0"><small>Σφάλμα: ${result.error}</small></p>
+                    </div>
+                `;
+            }
+        } catch (error) {
+            console.error('Error loading documentation:', error);
+            targetElement.innerHTML = `
+                <div class="alert alert-danger">
+                    <h6><i class="bi bi-exclamation-triangle me-2"></i>Σφάλμα Σύνδεσης</h6>
+                    <p>Δεν ήταν δυνατή η φόρτωση της τεκμηρίωσης.</p>
+                    <p class="mb-0"><small>Σφάλμα: ${error.message}</small></p>
+                </div>
+            `;
+        }
+    }
+    
+    // Show documentation modal
+    function showDocumentationModal() {
+        // Load default documentation (beginner guide)
+        loadDocumentation('BEGINNER-GUIDE.md', 'beginner-guide-html');
+        
+        // Set up tab change event listeners
+        const tabs = document.querySelectorAll('#documentation-tabs button');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-bs-target').replace('#', '');
+                const contentId = targetId.replace('-content', '-html');
+                
+                // Map tab to filename
+                const fileMap = {
+                    'beginner-guide-html': 'BEGINNER-GUIDE.md',
+                    'auto-backup-html': 'AUTO_BACKUP_INFO.md',
+                    'focus-fix-html': 'FOCUS_FIX_GUIDE.md',
+                    'release-notes-html': 'RELEASE-NOTES.md',
+                    'license-html': 'LICENSE'
+                };
+                
+                const filename = fileMap[contentId];
+                if (filename) {
+                    loadDocumentation(filename, contentId);
+                }
+            });
+        });
+        
+        documentationModal.show();
+    }
+    
+    // Open documentation in separate window
+    function openDocumentationWindow(filename) {
+        // Map filename to title
+        const titleMap = {
+            'BEGINNER-GUIDE.md': 'Οδηγός για Αρχάριους',
+            'AUTO_BACKUP_INFO.md': 'Auto Backup System',
+            'FOCUS_FIX_GUIDE.md': 'Focus Fix Guide',
+            'RELEASE-NOTES.md': 'Release Notes',
+            'LICENSE': 'License'
+        };
+        
+        const title = titleMap[filename] || 'Τεκμηρίωση';
+        
+        // Set modal title
+        document.getElementById('doc-window-title').innerHTML = `<i class="bi bi-book me-2"></i>${title}`;
+        
+        // Load content
+        loadDocumentation(filename, 'doc-window-content');
+        
+        // Show modal
+        documentationWindowModal.show();
+    }
+    
+    // Make function available globally
+    window.openDocumentationWindow = openDocumentationWindow;
+    
+    // ==================== EXCEL IMPORT FUNCTIONS ====================
+    
+    let excelImportData = null;
+    let excelImportStep = 1;
+    
+    // Show Excel import modal
+    function showExcelImportModal() {
+        resetExcelImportModal();
+        excelImportModal.show();
+    }
+    
+    // Reset modal to initial state
+    function resetExcelImportModal() {
+        excelImportStep = 1;
+        excelImportData = null;
+        
+        // Show step 1, hide others
+        document.getElementById('excel-step-1').classList.remove('d-none');
+        document.getElementById('excel-step-2').classList.add('d-none');
+        document.getElementById('excel-step-3').classList.add('d-none');
+        
+        // Reset buttons
+        document.getElementById('next-step-btn').classList.add('d-none');
+        document.getElementById('import-data-btn').classList.add('d-none');
+        
+        // Reset progress
+        document.getElementById('import-progress').style.width = '0%';
+        document.getElementById('import-status').textContent = 'Έτοιμο για εισαγωγή...';
+        
+        // Clear validation results
+        document.getElementById('validation-results').classList.add('d-none');
+    }
+    
+    // Initialize Excel import events (only once)
+    let excelImportEventsInitialized = false;
+    
+    function initializeExcelImportEvents() {
+        // Prevent multiple initialization
+        if (excelImportEventsInitialized) return;
+        
+        // File selection button
+        const selectExcelBtn = document.getElementById('select-excel-btn');
+        if (selectExcelBtn) {
+            selectExcelBtn.addEventListener('click', selectExcelFile);
+        }
+        
+        // Drop zone events
+        const dropZone = document.getElementById('excel-drop-zone');
+        if (dropZone) {
+            dropZone.addEventListener('dragover', handleDragOver);
+            dropZone.addEventListener('drop', handleDrop);
+            dropZone.addEventListener('dragleave', handleDragLeave);
+        }
+        
+        // Navigation buttons
+        const backToSelectionBtn = document.getElementById('back-to-selection');
+        const nextStepBtn = document.getElementById('next-step-btn');
+        const importDataBtn = document.getElementById('import-data-btn');
+        
+        if (backToSelectionBtn) {
+            backToSelectionBtn.addEventListener('click', () => showExcelStep(1));
+        }
+        if (nextStepBtn) {
+            nextStepBtn.addEventListener('click', nextExcelStep);
+        }
+        if (importDataBtn) {
+            importDataBtn.addEventListener('click', importExcelData);
+        }
+        
+        excelImportEventsInitialized = true;
+    }
+    
+    // Handle file selection
+    async function selectExcelFile() {
+        try {
+            const result = await window.electronAPI.selectExcelFile();
+            if (result.success) {
+                await processSelectedFile(result.filePath, result.fileName, result.fileExtension);
+            } else {
+                showNotification('Δεν επιλέχθηκε αρχείο', 'info');
+            }
+        } catch (error) {
+            console.error('Error selecting file:', error);
+            showNotification('Σφάλμα κατά την επιλογή αρχείου', 'error');
+        }
+    }
+    
+    // Handle drag and drop
+    function handleDragOver(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'copy';
+        e.currentTarget.classList.add('dragover');
+    }
+    
+    function handleDragLeave(e) {
+        e.currentTarget.classList.remove('dragover');
+    }
+    
+    function handleDrop(e) {
+        e.preventDefault();
+        e.currentTarget.classList.remove('dragover');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            const file = files[0];
+            const filePath = file.path;
+            const fileName = file.name;
+            const fileExtension = path.extname(fileName).toLowerCase();
+            
+            processSelectedFile(filePath, fileName, fileExtension);
+        }
+    }
+    
+    // Process selected file
+    async function processSelectedFile(filePath, fileName, fileExtension) {
+        try {
+            // Show loading
+            document.getElementById('import-status').textContent = 'Διάβασμα αρχείου...';
+            
+            // Read file content
+            const result = await window.electronAPI.readExcelFile(filePath);
+            
+            if (result.success) {
+                // Parse file content
+                const parsedData = parseFileContent(result.content, result.fileExtension);
+                
+                if (parsedData.success) {
+                    excelImportData = {
+                        fileName: fileName,
+                        fileExtension: fileExtension,
+                        headers: parsedData.headers,
+                        rows: parsedData.rows,
+                        totalRecords: parsedData.rows.length
+                    };
+                    
+                    // Show step 2 (preview)
+                    showExcelStep(2);
+                    populateDataPreview();
+                } else {
+                    showNotification('Σφάλμα στην ανάγνωση του αρχείου: ' + parsedData.error, 'error');
+                }
+            } else {
+                showNotification('Σφάλμα στη φόρτωση αρχείου: ' + result.error, 'error');
+            }
+        } catch (error) {
+            console.error('Error processing file:', error);
+            showNotification('Σφάλμα στην επεξεργασία αρχείου', 'error');
+        }
+    }
+    
+    // Parse file content based on file type
+    function parseFileContent(content, fileExtension) {
+        try {
+            if (fileExtension === '.csv') {
+                return parseCSVContent(content);
+            } else {
+                // For Excel files, we'd need a library like xlsx
+                // For now, we'll return an error
+                return { success: false, error: 'Τα Excel αρχεία δεν υποστηρίζονται ακόμα. Χρησιμοποιήστε CSV.' };
+            }
+        } catch (error) {
+            return { success: false, error: 'Σφάλμα στην ανάλυση αρχείου' };
+        }
+    }
+    
+    // Parse CSV content
+    function parseCSVContent(content) {
+        try {
+            const lines = content.split('\n').filter(line => line.trim() !== '');
+            
+            if (lines.length === 0) {
+                return { success: false, error: 'Το αρχείο είναι κενό' };
+            }
+            
+            // Parse headers
+            const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+            
+            // Parse data rows
+            const rows = [];
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
+                if (values.length === headers.length) {
+                    const row = {};
+                    headers.forEach((header, index) => {
+                        row[header] = values[index];
+                    });
+                    rows.push(row);
+                }
+            }
+            
+            return {
+                success: true,
+                headers: headers,
+                rows: rows
+            };
+        } catch (error) {
+            return { success: false, error: 'Σφάλμα στην ανάλυση CSV' };
+        }
+    }
+    
+    // Show specific Excel import step
+    function showExcelStep(step) {
+        // Hide all steps
+        document.getElementById('excel-step-1').classList.add('d-none');
+        document.getElementById('excel-step-2').classList.add('d-none');
+        document.getElementById('excel-step-3').classList.add('d-none');
+        
+        // Show target step
+        document.getElementById(`excel-step-${step}`).classList.remove('d-none');
+        document.getElementById(`excel-step-${step}`).classList.add('fade-in');
+        
+        excelImportStep = step;
+        
+        // Update buttons
+        updateExcelImportButtons();
+    }
+    
+    // Update import buttons based on current step
+    function updateExcelImportButtons() {
+        const nextBtn = document.getElementById('next-step-btn');
+        const importBtn = document.getElementById('import-data-btn');
+        
+        nextBtn.classList.add('d-none');
+        importBtn.classList.add('d-none');
+        
+        if (excelImportStep === 2) {
+            nextBtn.classList.remove('d-none');
+        } else if (excelImportStep === 3) {
+            importBtn.classList.remove('d-none');
+        }
+    }
+    
+    // Go to next step
+    function nextExcelStep() {
+        if (excelImportStep === 2) {
+            // Validate data before proceeding
+            const validationResult = validateExcelData();
+            if (validationResult.canProceed) {
+                showExcelStep(3);
+            } else {
+                showNotification('Παρακαλώ διορθώστε τα σφάλματα πριν συνεχίσετε', 'warning');
+            }
+        }
+    }
+    
+    // Populate data preview
+    function populateDataPreview() {
+        if (!excelImportData) return;
+        
+        // Update file info
+        document.getElementById('selected-file-name').value = excelImportData.fileName;
+        document.getElementById('total-records').value = excelImportData.totalRecords;
+        
+        // Create column mapping
+        createColumnMapping();
+        
+        // Create preview table
+        createPreviewTable();
+        
+        // Validate data
+        const validationResult = validateExcelData();
+        showValidationResults(validationResult);
+    }
+    
+    // Create column mapping interface
+    function createColumnMapping() {
+        const mappingContainer = document.getElementById('column-mapping');
+        
+        // Store existing selections before clearing
+        const existingSelections = {};
+        const existingSelects = mappingContainer.querySelectorAll('select');
+        existingSelects.forEach(select => {
+            existingSelections[select.id] = select.value;
+        });
+        
+        mappingContainer.innerHTML = '';
+        
+        const requiredFields = [
+            { key: 'firstName', label: 'Όνομα', required: true },
+            { key: 'lastName', label: 'Επώνυμο', required: true },
+            { key: 'age', label: 'Ηλικία', required: true },
+            { key: 'group', label: 'Ομάδα', required: true },
+            { key: 'dailyLimit', label: 'Ημερήσιο Όριο', required: false },
+            { key: 'initialBalance', label: 'Αρχικό Υπόλοιπο', required: false }
+        ];
+        
+        requiredFields.forEach(field => {
+            const colDiv = document.createElement('div');
+            colDiv.className = 'col-md-4 mb-3';
+            
+            const mappingItem = document.createElement('div');
+            mappingItem.className = 'column-mapping-item';
+            
+            const label = document.createElement('label');
+            label.className = 'form-label';
+            label.textContent = field.label + (field.required ? ' *' : '');
+            
+            const select = document.createElement('select');
+            select.className = 'form-select form-select-sm';
+            select.id = `map-${field.key}`;
+            
+            // Add options
+            const emptyOption = document.createElement('option');
+            emptyOption.value = '';
+            emptyOption.textContent = '-- Επιλέξτε στήλη --';
+            select.appendChild(emptyOption);
+            
+            excelImportData.headers.forEach(header => {
+                const option = document.createElement('option');
+                option.value = header;
+                option.textContent = header;
+                
+                // Restore previous selection if exists
+                if (existingSelections[select.id] === header) {
+                    option.selected = true;
+                }
+                // Auto-select if similar name and no previous selection
+                else if (!existingSelections[select.id]) {
+                    if (field.key === 'firstName' && (header.toLowerCase().includes('όνομα') || header.toLowerCase().includes('name'))) {
+                        option.selected = true;
+                    } else if (field.key === 'lastName' && (header.toLowerCase().includes('επώνυμο') || header.toLowerCase().includes('surname'))) {
+                        option.selected = true;
+                    } else if (field.key === 'age' && (header.toLowerCase().includes('ηλικία') || header.toLowerCase().includes('age'))) {
+                        option.selected = true;
+                    } else if (field.key === 'group' && (header.toLowerCase().includes('ομάδα') || header.toLowerCase().includes('group'))) {
+                        option.selected = true;
+                    } else if (field.key === 'dailyLimit' && (header.toLowerCase().includes('όριο') || header.toLowerCase().includes('limit'))) {
+                        option.selected = true;
+                    } else if (field.key === 'initialBalance' && (header.toLowerCase().includes('υπόλοιπο') || header.toLowerCase().includes('balance'))) {
+                        option.selected = true;
+                    }
+                }
+                
+                select.appendChild(option);
+            });
+            
+            mappingItem.appendChild(label);
+            mappingItem.appendChild(select);
+            colDiv.appendChild(mappingItem);
+            mappingContainer.appendChild(colDiv);
+        });
+    }
+    
+    // Create preview table
+    function createPreviewTable() {
+        const headerRow = document.getElementById('preview-header');
+        const bodyContainer = document.getElementById('preview-body');
+        
+        headerRow.innerHTML = '';
+        bodyContainer.innerHTML = '';
+        
+        // Create headers
+        excelImportData.headers.forEach(header => {
+            const th = document.createElement('th');
+            th.textContent = header;
+            headerRow.appendChild(th);
+        });
+        
+        // Create rows (max 10 for preview)
+        const maxRows = Math.min(10, excelImportData.rows.length);
+        for (let i = 0; i < maxRows; i++) {
+            const row = excelImportData.rows[i];
+            const tr = document.createElement('tr');
+            
+            excelImportData.headers.forEach(header => {
+                const td = document.createElement('td');
+                td.textContent = row[header] || '';
+                tr.appendChild(td);
+            });
+            
+            bodyContainer.appendChild(tr);
+        }
+    }
+    
+    // Validate Excel data
+    function validateExcelData() {
+        let validCount = 0;
+        let warningCount = 0;
+        let errorCount = 0;
+        
+        // Check if all required mappings are set
+        const requiredMappings = ['firstName', 'lastName', 'age', 'group'];
+        const mappingErrors = [];
+        
+        requiredMappings.forEach(field => {
+            const select = document.getElementById(`map-${field}`);
+            if (!select || !select.value) {
+                mappingErrors.push(`Δεν έχει οριστεί αντιστοίχιση για: ${field}`);
+                errorCount++;
+            }
+        });
+        
+        if (mappingErrors.length === 0) {
+            // Validate data rows
+            excelImportData.rows.forEach(row => {
+                const issues = validateRowData(row);
+                if (issues.errors.length > 0) {
+                    errorCount++;
+                } else if (issues.warnings.length > 0) {
+                    warningCount++;
+                } else {
+                    validCount++;
+                }
+            });
+        }
+        
+        return {
+            validCount,
+            warningCount,
+            errorCount,
+            canProceed: errorCount === 0,
+            mappingErrors
+        };
+    }
+    
+    // Validate individual row data
+    function validateRowData(row) {
+        const errors = [];
+        const warnings = [];
+        
+        // Get field mappings
+        const firstNameField = document.getElementById('map-firstName')?.value;
+        const lastNameField = document.getElementById('map-lastName')?.value;
+        const ageField = document.getElementById('map-age')?.value;
+        const groupField = document.getElementById('map-group')?.value;
+        
+        // Validate required fields
+        if (!row[firstNameField] || row[firstNameField].trim() === '') {
+            errors.push('Το όνομα είναι υποχρεωτικό');
+        }
+        
+        if (!row[lastNameField] || row[lastNameField].trim() === '') {
+            errors.push('Το επώνυμο είναι υποχρεωτικό');
+        }
+        
+        if (!row[ageField] || isNaN(parseInt(row[ageField]))) {
+            errors.push('Η ηλικία πρέπει να είναι αριθμός');
+        } else {
+            const age = parseInt(row[ageField]);
+            if (age < 5 || age > 18) {
+                warnings.push('Η ηλικία φαίνεται ασυνήθιστη (5-18)');
+            }
+        }
+        
+        if (!row[groupField] || row[groupField].trim() === '') {
+            errors.push('Η ομάδα είναι υποχρεωτική');
+        }
+        
+        return { errors, warnings };
+    }
+    
+    // Show validation results
+    function showValidationResults(validationResult) {
+        const resultsContainer = document.getElementById('validation-results');
+        
+        document.getElementById('valid-count').textContent = validationResult.validCount;
+        document.getElementById('warning-count').textContent = validationResult.warningCount;
+        document.getElementById('error-count').textContent = validationResult.errorCount;
+        
+        resultsContainer.classList.remove('d-none');
+        
+        if (validationResult.errorCount > 0) {
+            resultsContainer.className = 'alert alert-danger';
+        } else if (validationResult.warningCount > 0) {
+            resultsContainer.className = 'alert alert-warning';
+        } else {
+            resultsContainer.className = 'alert alert-success';
+        }
+    }
+    
+    // Import Excel data
+    async function importExcelData() {
+        try {
+            const importBtn = document.getElementById('import-data-btn');
+            const progressBar = document.getElementById('import-progress');
+            const statusText = document.getElementById('import-status');
+            
+            // Disable button and show progress
+            importBtn.disabled = true;
+            statusText.textContent = 'Εισαγωγή δεδομένων...';
+            
+            // Get settings
+            const skipDuplicates = document.getElementById('skip-duplicates').checked;
+            const updateExisting = document.getElementById('update-existing').checked;
+            const defaultDailyLimit = parseFloat(document.getElementById('default-daily-limit').value) || 10;
+            const defaultInitialBalance = parseFloat(document.getElementById('default-initial-balance').value) || 0;
+            
+            // Get field mappings
+            const mappings = {
+                firstName: document.getElementById('map-firstName').value,
+                lastName: document.getElementById('map-lastName').value,
+                age: document.getElementById('map-age').value,
+                group: document.getElementById('map-group').value,
+                dailyLimit: document.getElementById('map-dailyLimit').value,
+                initialBalance: document.getElementById('map-initialBalance').value
+            };
+            
+            // Get existing children
+            const existingChildren = safeGetFromStorage('pitsasChildren', []);
+            const importedChildren = [];
+            const skippedChildren = [];
+            const updatedChildren = [];
+            
+            // Process each row
+            for (let i = 0; i < excelImportData.rows.length; i++) {
+                const row = excelImportData.rows[i];
+                
+                // Update progress
+                const progress = ((i + 1) / excelImportData.rows.length) * 100;
+                progressBar.style.width = progress + '%';
+                statusText.textContent = `Εισαγωγή ${i + 1} από ${excelImportData.rows.length}...`;
+                
+                // Create child object
+                const childData = {
+                    id: Date.now() + i,
+                    firstName: row[mappings.firstName]?.trim() || '',
+                    lastName: row[mappings.lastName]?.trim() || '',
+                    age: parseInt(row[mappings.age]) || 0,
+                    group: row[mappings.group]?.trim() || '',
+                    dailyLimit: parseFloat(row[mappings.dailyLimit]) || defaultDailyLimit,
+                    balance: parseFloat(row[mappings.initialBalance]) || defaultInitialBalance,
+                    dailySpent: 0,
+                    registrationDate: new Date().toISOString(),
+                    lastTransaction: null,
+                    notes: `Εισήχθη από Excel: ${excelImportData.fileName}`,
+                    active: true
+                };
+                
+                // Check for duplicates
+                const existingChild = existingChildren.find(child => 
+                    child.firstName.toLowerCase() === childData.firstName.toLowerCase() &&
+                    child.lastName.toLowerCase() === childData.lastName.toLowerCase()
+                );
+                
+                if (existingChild) {
+                    if (skipDuplicates && !updateExisting) {
+                        skippedChildren.push(childData);
+                        continue;
+                    } else if (updateExisting) {
+                        // Update existing child
+                        Object.assign(existingChild, childData);
+                        existingChild.id = existingChild.id; // Keep original ID
+                        updatedChildren.push(existingChild);
+                    }
+                } else {
+                    // Add new child
+                    existingChildren.push(childData);
+                    importedChildren.push(childData);
+                }
+                
+                // Small delay to show progress
+                await new Promise(resolve => setTimeout(resolve, 10));
+            }
+            
+            // Save updated children
+            safeSetToStorage('pitsasChildren', existingChildren);
+            
+            // Show completion
+            progressBar.style.width = '100%';
+            statusText.className = 'text-success';
+            statusText.textContent = `Εισαγωγή ολοκληρώθηκε! Νέα: ${importedChildren.length}, Ενημερώθηκαν: ${updatedChildren.length}, Παραλείφθηκαν: ${skippedChildren.length}`;
+            
+            // Show success notification
+            showNotification(`Εισήχθησαν ${importedChildren.length} νέα παιδιά από Excel`, 'success');
+            
+            // Close modal after delay
+            setTimeout(() => {
+                excelImportModal.hide();
+                updateChildrenView();
+                updateDashboard();
+            }, 2000);
+            
+        } catch (error) {
+            console.error('Error importing Excel data:', error);
+            showNotification('Σφάλμα κατά την εισαγωγή δεδομένων', 'error');
+        } finally {
+            document.getElementById('import-data-btn').disabled = false;
+        }
+    }
+    
+    // Make Excel import function available globally
+    window.showExcelImportModal = showExcelImportModal;
 });

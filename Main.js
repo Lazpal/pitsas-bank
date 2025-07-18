@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, ipcMain } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
@@ -261,6 +261,102 @@ ipcMain.handle('restore-focus', async () => {
     return { success: false, error: 'Window not available' };
   } catch (error) {
     console.error('Restore focus error:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+// IPC Handler για διάβασμα .md αρχείων
+ipcMain.handle('read-documentation', async (event, filename) => {
+  try {
+    const filePath = path.join(__dirname, filename);
+    
+    // Έλεγχος ότι το αρχείο υπάρχει
+    if (!fs.existsSync(filePath)) {
+      return { success: false, error: `Το αρχείο ${filename} δεν βρέθηκε` };
+    }
+    
+    // Διάβασμα του αρχείου
+    const content = fs.readFileSync(filePath, 'utf-8');
+    
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`Successfully read documentation file: ${filename}`);
+    }
+    
+    return { success: true, content };
+  } catch (error) {
+    console.error('Error reading documentation:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+// IPC Handler για Excel import
+ipcMain.handle('select-excel-file', async () => {
+  try {
+    const result = await dialog.showOpenDialog(mainWindow, {
+      title: 'Επιλέξτε Excel αρχείο',
+      filters: [
+        { name: 'Excel Files', extensions: ['xlsx', 'xls', 'csv'] },
+        { name: 'CSV Files', extensions: ['csv'] },
+        { name: 'All Files', extensions: ['*'] }
+      ],
+      properties: ['openFile']
+    });
+
+    if (!result.canceled && result.filePaths.length > 0) {
+      const filePath = result.filePaths[0];
+      const fileExtension = path.extname(filePath).toLowerCase();
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`Selected file: ${filePath}`);
+      }
+      
+      return { 
+        success: true, 
+        filePath: filePath,
+        fileName: path.basename(filePath),
+        fileExtension: fileExtension
+      };
+    } else {
+      return { success: false, error: 'Δεν επιλέχθηκε αρχείο' };
+    }
+  } catch (error) {
+    console.error('Error selecting Excel file:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+// IPC Handler για διάβασμα Excel αρχείου
+ipcMain.handle('read-excel-file', async (event, filePath) => {
+  try {
+    if (!fs.existsSync(filePath)) {
+      return { success: false, error: 'Το αρχείο δεν βρέθηκε' };
+    }
+    
+    const fileExtension = path.extname(filePath).toLowerCase();
+    let content;
+    
+    if (fileExtension === '.csv') {
+      // Διάβασμα CSV αρχείου
+      content = fs.readFileSync(filePath, 'utf-8');
+    } else {
+      // Για Excel αρχεία, θα χρειαστούμε την xlsx βιβλιοθήκη
+      // Προς το παρόν θα επιστρέφουμε raw data
+      const buffer = fs.readFileSync(filePath);
+      content = buffer.toString('base64');
+    }
+    
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`Successfully read file: ${filePath}`);
+    }
+    
+    return { 
+      success: true, 
+      content: content,
+      fileExtension: fileExtension,
+      fileName: path.basename(filePath)
+    };
+  } catch (error) {
+    console.error('Error reading Excel file:', error);
     return { success: false, error: error.message };
   }
 });
