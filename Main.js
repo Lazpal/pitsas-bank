@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
@@ -89,32 +89,59 @@ function createWindow() {
 
   mainWindow.loadFile('app/index.html');
   
-  // Focus management για modals και popups
+  // Focus management για modals και popups - DISABLED
+  // These were too aggressive and causing dropdown interference
+  /*
   mainWindow.on('focus', () => {
     // Εξασφάλιση ότι το κύριο παράθυρο παίρνει focus
     setTimeout(() => {
       if (mainWindow && !mainWindow.isDestroyed()) {
-        mainWindow.webContents.focus();
+        // Έλεγχος αν υπάρχει ανοιχτό dropdown πριν παρέμβουμε
+        mainWindow.webContents.executeJavaScript(`
+          document.querySelector('.dropdown-menu.show') !== null
+        `).then((hasOpenDropdown) => {
+          if (!hasOpenDropdown) {
+            mainWindow.webContents.focus();
+          }
+        }).catch(() => {
+          mainWindow.webContents.focus();
+        });
       }
     }, 50);
   });
   
-  // Χειρισμός όταν το παράθυρο χάνει focus
+  // Χειρισμός όταν το παράθυρο χάνει focus με dropdown protection
   mainWindow.on('blur', () => {
     // Επαναφορά focus μετά από λίγο (για modals) - πιο αγρεσσικό
     setTimeout(() => {
       if (mainWindow && !mainWindow.isDestroyed() && mainWindow.isVisible() && !mainWindow.isMinimized()) {
-        // Έλεγχος αν υπάρχει άλλο παράθυρο ανοιχτό
-        const allWindows = require('electron').BrowserWindow.getAllWindows();
-        const focusedWindow = require('electron').BrowserWindow.getFocusedWindow();
-        
-        if (!focusedWindow || focusedWindow === mainWindow) {
-          mainWindow.focus();
-          mainWindow.webContents.focus();
-        }
+        // Έλεγχος αν υπάρχει άλλο παράθυρο ανοιχτό και αν υπάρχει dropdown
+        mainWindow.webContents.executeJavaScript(`
+          document.querySelector('.dropdown-menu.show') !== null
+        `).then((hasOpenDropdown) => {
+          if (!hasOpenDropdown) {
+            const allWindows = require('electron').BrowserWindow.getAllWindows();
+            const focusedWindow = require('electron').BrowserWindow.getFocusedWindow();
+            
+            if (!focusedWindow || focusedWindow === mainWindow) {
+              mainWindow.focus();
+              mainWindow.webContents.focus();
+            }
+          }
+        }).catch(() => {
+          // Fallback - continue with focus restoration
+          const allWindows = require('electron').BrowserWindow.getAllWindows();
+          const focusedWindow = require('electron').BrowserWindow.getFocusedWindow();
+          
+          if (!focusedWindow || focusedWindow === mainWindow) {
+            mainWindow.focus();
+            mainWindow.webContents.focus();
+          }
+        });
       }
     }, 200);
   });
+  */
   
   // Χειρισμός keyboard events για focus
   mainWindow.webContents.on('before-input-event', (event, input) => {
@@ -129,11 +156,20 @@ function createWindow() {
     }
   });
   
-  // Αντιμετώπιση παραθύρων που κλέβουν focus
+  // Αντιμετώπιση παραθύρων που κλέβουν focus με dropdown protection
   mainWindow.on('page-title-updated', (event) => {
     setTimeout(() => {
       if (mainWindow && !mainWindow.isDestroyed()) {
-        mainWindow.focus();
+        // Έλεγχος για dropdown πριν παρέμβουμε
+        mainWindow.webContents.executeJavaScript(`
+          document.querySelector('.dropdown-menu.show') !== null
+        `).then((hasOpenDropdown) => {
+          if (!hasOpenDropdown) {
+            mainWindow.focus();
+          }
+        }).catch(() => {
+          mainWindow.focus();
+        });
       }
     }, 100);
   });
@@ -285,78 +321,6 @@ ipcMain.handle('read-documentation', async (event, filename) => {
     return { success: true, content };
   } catch (error) {
     console.error('Error reading documentation:', error);
-    return { success: false, error: error.message };
-  }
-});
-
-// IPC Handler για Excel import
-ipcMain.handle('select-excel-file', async () => {
-  try {
-    const result = await dialog.showOpenDialog(mainWindow, {
-      title: 'Επιλέξτε Excel αρχείο',
-      filters: [
-        { name: 'Excel Files', extensions: ['xlsx', 'xls', 'csv'] },
-        { name: 'CSV Files', extensions: ['csv'] },
-        { name: 'All Files', extensions: ['*'] }
-      ],
-      properties: ['openFile']
-    });
-
-    if (!result.canceled && result.filePaths.length > 0) {
-      const filePath = result.filePaths[0];
-      const fileExtension = path.extname(filePath).toLowerCase();
-      
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`Selected file: ${filePath}`);
-      }
-      
-      return { 
-        success: true, 
-        filePath: filePath,
-        fileName: path.basename(filePath),
-        fileExtension: fileExtension
-      };
-    } else {
-      return { success: false, error: 'Δεν επιλέχθηκε αρχείο' };
-    }
-  } catch (error) {
-    console.error('Error selecting Excel file:', error);
-    return { success: false, error: error.message };
-  }
-});
-
-// IPC Handler για διάβασμα Excel αρχείου
-ipcMain.handle('read-excel-file', async (event, filePath) => {
-  try {
-    if (!fs.existsSync(filePath)) {
-      return { success: false, error: 'Το αρχείο δεν βρέθηκε' };
-    }
-    
-    const fileExtension = path.extname(filePath).toLowerCase();
-    let content;
-    
-    if (fileExtension === '.csv') {
-      // Διάβασμα CSV αρχείου
-      content = fs.readFileSync(filePath, 'utf-8');
-    } else {
-      // Για Excel αρχεία, θα χρειαστούμε την xlsx βιβλιοθήκη
-      // Προς το παρόν θα επιστρέφουμε raw data
-      const buffer = fs.readFileSync(filePath);
-      content = buffer.toString('base64');
-    }
-    
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`Successfully read file: ${filePath}`);
-    }
-    
-    return { 
-      success: true, 
-      content: content,
-      fileExtension: fileExtension,
-      fileName: path.basename(filePath)
-    };
-  } catch (error) {
-    console.error('Error reading Excel file:', error);
     return { success: false, error: error.message };
   }
 });

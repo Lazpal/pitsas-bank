@@ -9,9 +9,7 @@ const validChannels = [
   'restore-focus',
   'app-ready',
   'app-closing',
-  'read-documentation',
-  'select-excel-file',
-  'read-excel-file'
+  'read-documentation'
 ];
 
 // Validate channel
@@ -75,26 +73,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
       return await ipcRenderer.invoke('read-documentation', filename);
     } catch (error) {
       console.error('Read documentation error:', error);
-      return { success: false, error: error.message };
-    }
-  },
-  
-  // Excel Import APIs
-  selectExcelFile: async () => {
-    try {
-      return await ipcRenderer.invoke('select-excel-file');
-    } catch (error) {
-      console.error('Select Excel file error:', error);
-      return { success: false, error: error.message };
-    }
-  },
-  
-  readExcelFile: async (filePath) => {
-    try {
-      if (!filePath) throw new Error('No file path provided');
-      return await ipcRenderer.invoke('read-excel-file', filePath);
-    } catch (error) {
-      console.error('Read Excel file error:', error);
       return { success: false, error: error.message };
     }
   },

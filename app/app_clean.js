@@ -40,7 +40,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Μετανάστευση δεδομένων - εξασφάλιση ότι όλα τα παιδιά έχουν τα νέα πεδία
     migrateChildrenData();
     
-    // DOM Elements
+    // Global state tracking
+    let currentView = 'dashboard';
+    
+    // DOM Elements with null checks
     const loginForm = document.getElementById('login-form');
     const loginContainer = document.getElementById('login-container');
     const appContainer = document.getElementById('app-container');
@@ -48,17 +51,34 @@ document.addEventListener('DOMContentLoaded', function() {
     const logoutBtn = document.getElementById('logout-btn');
     const currentTimeElement = document.getElementById('current-time');
     
-    // Navigation links
+    // Validation: Check if critical elements exist
+    if (!loginForm || !loginContainer || !appContainer) {
+        console.error('Critical DOM elements missing');
+        return;
+    }
+    
+    // Navigation links with null checks
     const dashboardLink = document.getElementById('dashboard-link');
     const childrenLink = document.getElementById('children-link');
     const transactionsLink = document.getElementById('transactions-link');
     const statisticsLink = document.getElementById('statistics-link');
     
-    // Views
+    // Views with null checks
     const dashboardView = document.getElementById('dashboard-view');
     const childrenView = document.getElementById('children-view');
     const transactionsView = document.getElementById('transactions-view');
     const statisticsView = document.getElementById('statistics-view');
+    
+    // Validation: Check if navigation elements exist
+    if (!dashboardLink || !childrenLink || !transactionsLink || !statisticsLink) {
+        console.error('Navigation elements missing');
+        return;
+    }
+    
+    if (!dashboardView || !childrenView || !transactionsView || !statisticsView) {
+        console.error('View elements missing');
+        return;
+    }
     
     // Quick action buttons
     const addChildBtn = document.getElementById('add-child-btn');
@@ -67,21 +87,32 @@ document.addEventListener('DOMContentLoaded', function() {
     const viewAllTransactionsBtn = document.getElementById('view-all-transactions');
     const backupBtn = document.getElementById('backup-btn');
     
-    // Modals
-    const addChildModal = new bootstrap.Modal(document.getElementById('addChildModal'));
-    const transactionModal = new bootstrap.Modal(document.getElementById('transactionModal'));
-    const receiptModal = new bootstrap.Modal(document.getElementById('receiptModal'));
-    const idCardModal = new bootstrap.Modal(document.getElementById('idCardModal'));
-    const backupModal = new bootstrap.Modal(document.getElementById('backupModal'));
-    const limitOverrideModal = new bootstrap.Modal(document.getElementById('limitOverrideModal'));
-    const quickSearchModal = new bootstrap.Modal(document.getElementById('quickSearchModal'));
-    const bulkDepositModal = new bootstrap.Modal(document.getElementById('bulkDepositModal'));
-    const dailyReportModal = new bootstrap.Modal(document.getElementById('dailyReportModal'));
-    const settingsModal = new bootstrap.Modal(document.getElementById('settingsModal'));
-    const keyboardShortcutsModal = new bootstrap.Modal(document.getElementById('keyboardShortcutsModal'));
-    const advancedSearchModal = new bootstrap.Modal(document.getElementById('advancedSearchModal'));
-    const documentationModal = new bootstrap.Modal(document.getElementById('documentationModal'));
-    const documentationWindowModal = new bootstrap.Modal(document.getElementById('documentationWindowModal'));
+    // Modals with error handling
+    let addChildModal, transactionModal, receiptModal, idCardModal, backupModal, 
+        limitOverrideModal, quickSearchModal, bulkDepositModal, dailyReportModal, 
+        settingsModal, keyboardShortcutsModal, advancedSearchModal, 
+        documentationModal, documentationWindowModal, excelImportModal;
+    
+    try {
+        addChildModal = new bootstrap.Modal(document.getElementById('addChildModal'));
+        transactionModal = new bootstrap.Modal(document.getElementById('transactionModal'));
+        receiptModal = new bootstrap.Modal(document.getElementById('receiptModal'));
+        idCardModal = new bootstrap.Modal(document.getElementById('idCardModal'));
+        backupModal = new bootstrap.Modal(document.getElementById('backupModal'));
+        limitOverrideModal = new bootstrap.Modal(document.getElementById('limitOverrideModal'));
+        quickSearchModal = new bootstrap.Modal(document.getElementById('quickSearchModal'));
+        bulkDepositModal = new bootstrap.Modal(document.getElementById('bulkDepositModal'));
+        dailyReportModal = new bootstrap.Modal(document.getElementById('dailyReportModal'));
+        settingsModal = new bootstrap.Modal(document.getElementById('settingsModal'));
+        keyboardShortcutsModal = new bootstrap.Modal(document.getElementById('keyboardShortcutsModal'));
+        advancedSearchModal = new bootstrap.Modal(document.getElementById('advancedSearchModal'));
+        documentationModal = new bootstrap.Modal(document.getElementById('documentationModal'));
+        documentationWindowModal = new bootstrap.Modal(document.getElementById('documentationWindowModal'));
+        excelImportModal = new bootstrap.Modal(document.getElementById('excelImportModal'));
+    } catch (error) {
+        console.error('Error initializing modals:', error);
+        showNotification('Σφάλμα κατά την αρχικοποίηση των modals', 'error');
+    }
     
     // Add event listener to clean up transaction modal classes when hidden
     document.getElementById('transactionModal').addEventListener('hidden.bs.modal', function () {
@@ -237,6 +268,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Navigation functionality - Enhanced with breadcrumbs
     dashboardLink.addEventListener('click', function(e) {
         e.preventDefault();
+        currentView = 'dashboard';
         showView(dashboardView);
         setActiveLink(dashboardLink);
         loadDashboard();
@@ -245,6 +277,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     childrenLink.addEventListener('click', function(e) {
         e.preventDefault();
+        currentView = 'children';
         showView(childrenView);
         setActiveLink(childrenLink);
         loadChildren();
@@ -253,6 +286,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     transactionsLink.addEventListener('click', function(e) {
         e.preventDefault();
+        currentView = 'transactions';
         showView(transactionsView);
         setActiveLink(transactionsLink);
         loadTransactions();
@@ -261,6 +295,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     statisticsLink.addEventListener('click', function(e) {
         e.preventDefault();
+        currentView = 'statistics';
         showView(statisticsView);
         setActiveLink(statisticsLink);
         loadStatistics();
@@ -316,7 +351,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Save new child
-    saveChildBtn.addEventListener('click', function() {
+    saveChildBtn.addEventListener('click', function(e) {
+        e.preventDefault(); // Prevent any form submission
         const firstName = document.getElementById('child-first-name').value;
         const lastName = document.getElementById('child-last-name').value;
         const age = parseInt(document.getElementById('child-age').value);
@@ -382,11 +418,13 @@ document.addEventListener('DOMContentLoaded', function() {
         // Show success notification
         showNotification(`Το παιδί προστέθηκε με επιτυχία! ID: ${uniqueId}`, 'success');
         
-        // Reload the appropriate view
+        // Reload the appropriate view WITHOUT FULL RELOAD
         if (childrenView.classList.contains('d-none')) {
-            loadDashboard();
+            // If we're not in children view, just update dashboard stats
+            updateDashboardStats();
         } else {
-            loadChildren();
+            // If we're in children view, just update the specific child row
+            updateChildRowInTable(newChild.id);
         }
         
         // Show ID card for the new child
@@ -396,7 +434,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Save transaction
-    saveTransactionBtn.addEventListener('click', function() {
+    saveTransactionBtn.addEventListener('click', function(e) {
+        e.preventDefault(); // Prevent any form submission
         const childId = document.getElementById('transaction-child').value;
         const type = document.getElementById('transaction-type').value;
         const amount = parseFloat(document.getElementById('transaction-amount').value);
@@ -497,15 +536,19 @@ document.addEventListener('DOMContentLoaded', function() {
             showReceipt(newTransaction.id);
         }
         
-        // Reload the current view
+        // UPDATE CURRENT VIEW WITHOUT FULL RELOAD
         if (!dashboardView.classList.contains('d-none')) {
-            loadDashboard();
+            // Just update dashboard stats, don't reload entire dashboard
+            updateDashboardStats();
         } else if (!childrenView.classList.contains('d-none')) {
-            loadChildren();
+            // Just update the specific child row, don't reload entire table
+            updateChildRowInTable(childId);
         } else if (!transactionsView.classList.contains('d-none')) {
-            loadTransactions();
+            // Just prepend the new transaction, don't reload entire table
+            prependTransactionToTable(newTransaction);
         } else {
-            loadStatistics();
+            // Just update statistics, don't reload entire stats
+            updateStatisticsData();
         }
     });
     
@@ -616,6 +659,17 @@ document.addEventListener('DOMContentLoaded', function() {
         toggleDarkMode();
     });
     
+    // Prevent form submissions that might cause refresh
+    document.getElementById('add-child-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        return false;
+    });
+    
+    document.getElementById('transaction-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        return false;
+    });
+    
     // Helper functions
     function safeParseJSON(jsonString, defaultValue = null) {
         try {
@@ -639,10 +693,62 @@ document.addEventListener('DOMContentLoaded', function() {
     function safeSetToStorage(key, value) {
         try {
             localStorage.setItem(key, JSON.stringify(value));
+            
+            // Update lastBackup timestamp when saving children or transactions
+            if (key === 'pitsasChildren' || key === 'pitsasTransactions') {
+                updateLastBackupTimestamp();
+            }
+            
             return true;
         } catch (e) {
             console.error(`Error setting ${key} to localStorage:`, e);
             return false;
+        }
+    }
+    
+    // Helper function to update the last backup timestamp when data changes
+    function updateLastBackupTimestamp() {
+        try {
+            const settings = safeGetFromStorage('pitsasSettings', {});
+            settings.lastBackup = new Date().toISOString();
+            localStorage.setItem('pitsasSettings', JSON.stringify(settings));
+        } catch (e) {
+            console.warn('Error updating lastBackup timestamp:', e);
+        }
+    }
+    
+    // Helper function to ensure lastBackup timestamp exists
+    function ensureLastBackupTimestamp() {
+        try {
+            const settings = safeGetFromStorage('pitsasSettings', {});
+            const children = safeGetFromStorage('pitsasChildren', []);
+            const transactions = safeGetFromStorage('pitsasTransactions', []);
+            
+            // If we have data but no lastBackup timestamp, set it to current time
+            if ((children.length > 0 || transactions.length > 0) && !settings.lastBackup) {
+                settings.lastBackup = new Date().toISOString();
+                localStorage.setItem('pitsasSettings', JSON.stringify(settings));
+                console.log('Initialized missing lastBackup timestamp');
+            }
+        } catch (e) {
+            console.warn('Error ensuring lastBackup timestamp:', e);
+        }
+    }
+    
+    // Helper function to refresh current view without page reload
+    function refreshCurrentView() {
+        try {
+            if (currentView === 'dashboard') {
+                loadDashboard();
+            } else if (currentView === 'children') {
+                loadChildren();
+            } else if (currentView === 'transactions') {
+                loadTransactions();
+            } else if (currentView === 'statistics') {
+                loadStatistics();
+            }
+        } catch (error) {
+            console.warn('Error refreshing current view:', error);
         }
     }
     
@@ -1242,6 +1348,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function showChildHistory(childId) {
         // Set active tab to transactions
+        currentView = 'transactions';
         showView(transactionsView);
         setActiveLink(transactionsLink);
         
@@ -1818,8 +1925,33 @@ document.addEventListener('DOMContentLoaded', function() {
         window.print();
         document.body.innerHTML = originalContents;
         
-        // Reinitialize Bootstrap components and event listeners
-        location.reload();
+        // Reinitialize Bootstrap components without page reload
+        setTimeout(() => {
+            // Reinitialize Bootstrap tooltips and popovers
+            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+            const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+            
+            const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
+            const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
+            
+            // Refresh current view
+            if (currentView === 'dashboard') {
+                showView(dashboardView);
+                setActiveLink(dashboardLink);
+            } else if (currentView === 'children') {
+                showView(childrenView);
+                setActiveLink(childrenLink);
+                loadChildren();
+            } else if (currentView === 'transactions') {
+                showView(transactionsView);
+                setActiveLink(transactionsLink);
+                loadTransactions();
+            } else if (currentView === 'statistics') {
+                showView(statisticsView);
+                setActiveLink(statisticsLink);
+                loadStatistics();
+            }
+        }, 100);
     }
     
     function createBackup() {
@@ -1860,7 +1992,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = async function(e) {
             try {
                 const backup = JSON.parse(e.target.result);
                 
@@ -1869,8 +2001,57 @@ document.addEventListener('DOMContentLoaded', function() {
                     throw new Error('Μη έγκυρο αρχείο αντιγράφου ασφαλείας!');
                 }
                 
-                // Confirm restoration
-                if (confirm('Αυτή η ενέργεια θα αντικαταστήσει όλα τα τρέχοντα δεδομένα. Συνέχεια;')) {
+                // Check if backup is older than current data
+                const currentSettings = safeGetFromStorage('pitsasSettings', {});
+                const backupTimestamp = backup.timestamp ? new Date(backup.timestamp) : new Date(0);
+                const currentLastBackup = currentSettings.lastBackup ? new Date(currentSettings.lastBackup) : new Date(0);
+                
+                // Check if current data has any transactions or children
+                const currentChildren = safeGetFromStorage('pitsasChildren', []);
+                const currentTransactions = safeGetFromStorage('pitsasTransactions', []);
+                const hasCurrentData = currentChildren.length > 0 || currentTransactions.length > 0;
+                
+                let shouldConfirm = false;
+                let confirmMessage = '';
+                
+                if (hasCurrentData) {
+                    if (backupTimestamp < currentLastBackup) {
+                        // Backup is older than current data
+                        const backupDate = backupTimestamp.toLocaleString('el-GR');
+                        const currentDate = currentLastBackup.toLocaleString('el-GR');
+                        
+                        confirmMessage = `⚠️ ΠΡΟΣΟΧΗ: Το backup που προσπαθείτε να φορτώσετε είναι παλαιότερο από τα τρέχοντα δεδομένα!\n\n` +
+                                       `📅 Backup: ${backupDate}\n` +
+                                       `📅 Τρέχοντα δεδομένα: ${currentDate}\n\n` +
+                                       `Η επαναφορά θα αντικαταστήσει τα νεότερα δεδομένα με τα παλαιότερα.\n\n` +
+                                       `Είστε σίγουροι ότι θέλετε να συνεχίσετε;`;
+                        shouldConfirm = true;
+                    } else if (backupTimestamp > currentLastBackup) {
+                        // Backup is newer than current data - still confirm but with different message
+                        const backupDate = backupTimestamp.toLocaleString('el-GR');
+                        
+                        confirmMessage = `📥 Επαναφορά από νεότερο backup\n\n` +
+                                       `📅 Backup: ${backupDate}\n\n` +
+                                       `Τα τρέχοντα δεδομένα θα αντικατασταθούν. Συνέχεια;`;
+                        shouldConfirm = true;
+                    } else {
+                        // Same timestamp or very close - minimal confirmation
+                        confirmMessage = `Επαναφορά δεδομένων από backup. Συνέχεια;`;
+                        shouldConfirm = true;
+                    }
+                } else {
+                    // No current data - proceed without detailed confirmation
+                    confirmMessage = `Φόρτωση δεδομένων από backup. Συνέχεια;`;
+                    shouldConfirm = true;
+                }
+                
+                // Show confirmation only if needed
+                let shouldProceed = true;
+                if (shouldConfirm) {
+                    shouldProceed = await showConfirmModal('Επιβεβαίωση επαναφοράς', confirmMessage);
+                }
+                
+                if (shouldProceed) {
                     // Restore data
                     safeSetToStorage('pitsasChildren', backup.children);
                     safeSetToStorage('pitsasTransactions', backup.transactions);
@@ -1878,9 +2059,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     showNotification('Τα δεδομένα επαναφέρθηκαν επιτυχώς!', 'success');
                     
-                    // Reload the page
+                    // Refresh views instead of reloading the page
                     setTimeout(() => {
-                        location.reload();
+                        // Refresh all views to show restored data
+                        refreshCurrentView();
+                        
+                        // If we're on dashboard, refresh it too
+                        if (currentView === 'dashboard') {
+                            loadDashboard();
+                        }
                     }, 1500);
                 }
             } catch (error) {
@@ -1922,15 +2109,81 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    function loadAutoBackup() {
+    async function loadAutoBackup() {
         try {
             if (window.electronAPI && window.electronAPI.loadAutoBackup) {
                 // Φόρτωση από αρχείο μέσω Electron - ΣΙΩΠΗΛΑ
                 window.electronAPI.loadAutoBackup()
-                    .then(backupData => {
+                    .then(async backupData => {
                         if (backupData) {
                             // Αποθήκευση σε μεταβλητή για μελλοντική χρήση
                             window.availableAutoBackup = backupData;
+                            
+                            // Ανάλυση και έλεγχος backup
+                            const backup = typeof backupData === 'string' ? JSON.parse(backupData) : backupData;
+                            const backupDate = new Date(backup.timestamp);
+                            const now = new Date();
+                            const diffHours = (now - backupDate) / (1000 * 60 * 60);
+                            
+                            // Check current data state
+                            const currentChildren = safeGetFromStorage('pitsasChildren', []);
+                            const currentTransactions = safeGetFromStorage('pitsasTransactions', []);
+                            const currentSettings = safeGetFromStorage('pitsasSettings', {});
+                            const hasCurrentData = currentChildren.length > 0 || currentTransactions.length > 0;
+                            
+                            // Only show confirmation if backup is recent AND we have conflicting data
+                            if (diffHours < 24 && hasCurrentData) {
+                                const currentLastBackup = currentSettings.lastBackup ? new Date(currentSettings.lastBackup) : new Date(0);
+                                
+                                // Only ask if backup is actually newer than current data
+                                if (backupDate > currentLastBackup) {
+                                    const backupTime = backupDate.toLocaleString('el-GR');
+                                    const currentTime = (currentSettings.lastBackup && currentLastBackup.getTime() > 0) ? 
+                                                       currentLastBackup.toLocaleString('el-GR') : 
+                                                       'Άγνωστη';
+                                    
+                                    const message = `🔄 Βρέθηκε νεότερο αυτόματο backup!\n\n` +
+                                                   `📅 Backup: ${backupTime}\n` +
+                                                   `📅 Τρέχοντα: ${currentTime}\n\n` +
+                                                   `Θέλετε να επαναφέρετε τα νεότερα δεδομένα;`;
+                                    
+                                    if (await showConfirmModal('Νεότερο Backup Διαθέσιμο', message)) {
+                                        // Επαναφορά δεδομένων
+                                        if (backup.children) safeSetToStorage('pitsasChildren', backup.children);
+                                        if (backup.transactions) safeSetToStorage('pitsasTransactions', backup.transactions);
+                                        if (backup.settings) safeSetToStorage('pitsasSettings', backup.settings);
+                                        
+                                        showNotification('Τα δεδομένα επαναφέρθηκαν από το αυτόματο backup!', 'success');
+                                        
+                                        // Refresh views instead of reloading the page
+                                        setTimeout(() => {
+                                            // Refresh all views to show restored data
+                                            refreshCurrentView();
+                                            
+                                            // If we're on dashboard, refresh it too
+                                            if (currentView === 'dashboard') {
+                                                loadDashboard();
+                                            }
+                                        }, 1500);
+                                    }
+                                }
+                            } else if (!hasCurrentData && diffHours < 168) { // 1 week for empty data
+                                // If no current data exists, auto-restore recent backup without confirmation
+                                if (backup.children) safeSetToStorage('pitsasChildren', backup.children);
+                                if (backup.transactions) safeSetToStorage('pitsasTransactions', backup.transactions);
+                                if (backup.settings) safeSetToStorage('pitsasSettings', backup.settings);
+                                
+                                showNotification('Αυτόματη επαναφορά δεδομένων από backup', 'info');
+                                
+                                // Refresh views
+                                setTimeout(() => {
+                                    refreshCurrentView();
+                                    
+                                    if (currentView === 'dashboard') {
+                                        loadDashboard();
+                                    }
+                                }, 1000);
+                            }
                         }
                     })
                     .catch(error => {
@@ -1948,62 +2201,71 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    function processAutoBackup(backupData) {
-        try {
-            const backup = typeof backupData === 'string' ? JSON.parse(backupData) : backupData;
-            
-            if (!backup.autoBackup) return; // Δεν είναι αυτόματο backup
-            
-            const backupDate = new Date(backup.timestamp);
-            const now = new Date();
-            const diffHours = (now - backupDate) / (1000 * 60 * 60);
-            
-            // Εάν το backup είναι νεότερο από 24 ώρες, ρωτάμε τον χρήστη
-            if (diffHours < 24) {
-                const backupTime = backupDate.toLocaleString('el-GR');
-                if (confirm(`Βρέθηκε αυτόματο backup από ${backupTime}.\nΘέλετε να επαναφέρετε τα δεδομένα;`)) {
-                    // Επαναφορά δεδομένων
-                    if (backup.children) safeSetToStorage('pitsasChildren', backup.children);
-                    if (backup.transactions) safeSetToStorage('pitsasTransactions', backup.transactions);
-                    if (backup.settings) safeSetToStorage('pitsasSettings', backup.settings);
-                    
-                    showNotification('Τα δεδομένα επαναφέρθηκαν από το αυτόματο backup!', 'success');
-                    
-                    // Ανανέωση της σελίδας για φόρτωση των νέων δεδομένων
-                    setTimeout(() => {
-                        location.reload();
-                    }, 1500);
-                }
-            }
-        } catch (error) {
-            console.error('❌ Σφάλμα κατά την επεξεργασία του αυτόματου backup:', error);
-        }
-    }
-    
     // Χειροκίνητη εμφάνιση backup για recovery
-    function showEmergencyBackupInfo() {
+    async function showEmergencyBackupInfo() {
         const hasBackup = window.availableAutoBackup;
         let message = '🔍 Πληροφορίες Αυτόματου Backup:\n\n';
         
         if (hasBackup) {
             try {
                 const backup = typeof hasBackup === 'string' ? JSON.parse(hasBackup) : hasBackup;
-                const backupDate = new Date(backup.timestamp).toLocaleString('el-GR');
+                const backupDate = new Date(backup.timestamp);
+                const backupDateStr = backupDate.toLocaleString('el-GR');
                 const childrenCount = backup.children ? backup.children.length : 0;
                 const transactionsCount = backup.transactions ? backup.transactions.length : 0;
                 
+                // Check current data
+                const currentChildren = safeGetFromStorage('pitsasChildren', []);
+                const currentTransactions = safeGetFromStorage('pitsasTransactions', []);
+                const currentSettings = safeGetFromStorage('pitsasSettings', {});
+                const currentLastBackup = currentSettings.lastBackup ? new Date(currentSettings.lastBackup) : new Date(0);
+                const hasCurrentData = currentChildren.length > 0 || currentTransactions.length > 0;
+                
                 message += `✅ Διαθέσιμο Backup:\n`;
-                message += `📅 Ημερομηνία: ${backupDate}\n`;
+                message += `📅 Ημερομηνία: ${backupDateStr}\n`;
                 message += `👶 Παιδιά: ${childrenCount}\n`;
                 message += `💳 Συναλλαγές: ${transactionsCount}\n\n`;
+                
+                // Add warning if backup is older than current data
+                if (hasCurrentData && backupDate < currentLastBackup) {
+                    const currentDateStr = currentLastBackup.toLocaleString('el-GR');
+                    message += `⚠️ ΠΡΟΣΟΧΗ: Το backup είναι παλαιότερο!\n`;
+                    message += `📅 Τρέχοντα δεδομένα: ${currentDateStr}\n\n`;
+                    message += `Η επαναφορά θα αντικαταστήσει νεότερα δεδομένα.\n\n`;
+                } else if (hasCurrentData && backupDate > currentLastBackup) {
+                    message += `✨ Το backup είναι νεότερο από τα τρέχοντα δεδομένα.\n\n`;
+                } else if (!hasCurrentData) {
+                    message += `💡 Δεν υπάρχουν τρέχοντα δεδομένα.\n\n`;
+                }
+                
                 message += `Θέλετε να επαναφέρετε αυτά τα δεδομένα;`;
                 
-                if (confirm(message)) {
-                    processAutoBackup(hasBackup);
+                if (await showConfirmModal('Επαναφορά Backup', message)) {
+                    // Process the backup directly
+                    try {
+                        const backup = typeof hasBackup === 'string' ? JSON.parse(hasBackup) : hasBackup;
+                        if (backup.children) safeSetToStorage('pitsasChildren', backup.children);
+                        if (backup.transactions) safeSetToStorage('pitsasTransactions', backup.transactions);
+                        if (backup.settings) safeSetToStorage('pitsasSettings', backup.settings);
+                        
+                        showNotification('Τα δεδομένα επαναφέρθηκαν από το αυτόματο backup!', 'success');
+                        
+                        // Refresh views
+                        setTimeout(() => {
+                            refreshCurrentView();
+                            
+                            if (currentView === 'dashboard') {
+                                loadDashboard();
+                            }
+                        }, 1500);
+                    } catch (error) {
+                        console.error('Error processing backup:', error);
+                        showNotification('Σφάλμα κατά την επαναφορά backup', 'error');
+                    }
                 }
             } catch (error) {
                 message += `❌ Σφάλμα ανάλυσης backup`;
-                alert(message);
+                await showAlertModal('Σφάλμα', message);
             }
         } else {
             message += `❌ Δεν βρέθηκε διαθέσιμο αυτόματο backup.\n\n`;
@@ -2020,14 +2282,20 @@ document.addEventListener('DOMContentLoaded', function() {
             message += `2. Χρησιμοποιήστε το κανονικό backup/restore από το μενού\n`;
             message += `3. Επικοινωνήστε με υποστήριξη`;
             
-            alert(message);
+            await showAlertModal('Πληροφορίες Backup', message);
         }
     }
     
     // Αρχικοποίηση αυτόματου backup συστήματος
-    function initializeAutoBackup() {
+    async function initializeAutoBackup() {
+        // Ensure lastBackup timestamp exists
+        ensureLastBackupTimestamp();
+        
         // Φόρτωση αυτόματου backup κατά την εκκίνηση - ΣΙΩΠΗΛΑ
-        loadAutoBackup();
+        await loadAutoBackup();
+        
+        // Initialize Excel import events once at startup
+        initializeExcelImportEvents();
         
         // Αυτόματο backup κάθε 30 λεπτά - ΣΙΩΠΗΛΑ
         setInterval(createAutoBackup, 30 * 60 * 1000);
@@ -2380,1714 +2648,3 @@ document.addEventListener('DOMContentLoaded', function() {
     const homeLink = document.getElementById('home-brand');
     const navAddChild = document.getElementById('nav-add-child');
     const navBackup = document.getElementById('nav-backup');
-    const navQuickSearch = document.getElementById('nav-quick-search');
-    const navBulkDeposit = document.getElementById('nav-bulk-deposit');
-    const navDailyReport = document.getElementById('nav-daily-report');
-    const navLimitsReport = document.getElementById('nav-limits-report');
-    const navExportStats = document.getElementById('nav-export-stats');
-    const navResetLimits = document.getElementById('nav-reset-limits');
-    const navSettings = document.getElementById('nav-settings');
-    const navDocumentation = document.getElementById('nav-documentation');
-    const navBeginnerGuide = document.getElementById('nav-beginner-guide');
-    const navShortcuts = document.getElementById('nav-shortcuts');
-    
-    if (homeLink) {
-        homeLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            showView(dashboardView);
-            setActiveLink(dashboardLink);
-            updateBreadcrumbs('dashboard');
-        });
-    }
-    
-    if (navAddChild) {
-        navAddChild.addEventListener('click', function(e) {
-            e.preventDefault();
-            addChildModal.show();
-        });
-    }
-    
-    if (navBackup) {
-        navBackup.addEventListener('click', function(e) {
-            e.preventDefault();
-            backupModal.show();
-        });
-    }
-    
-    if (navQuickSearch) {
-        navQuickSearch.addEventListener('click', function(e) {
-            e.preventDefault();
-            quickSearchModal.show();
-        });
-    }
-    
-    if (navBulkDeposit) {
-        navBulkDeposit.addEventListener('click', function(e) {
-            e.preventDefault();
-            prepareBulkDeposit();
-            bulkDepositModal.show();
-        });
-    }
-    
-    if (navDailyReport) {
-        navDailyReport.addEventListener('click', function(e) {
-            e.preventDefault();
-            setupDailyReport();
-            dailyReportModal.show();
-        });
-    }
-    
-    if (navLimitsReport) {
-        navLimitsReport.addEventListener('click', function(e) {
-            e.preventDefault();
-            generateLimitsReport();
-        });
-    }
-    
-    if (navExportStats) {
-        navExportStats.addEventListener('click', function(e) {
-            e.preventDefault();
-            exportFullStatistics();
-        });
-    }
-    
-    if (navResetLimits) {
-        navResetLimits.addEventListener('click', function(e) {
-            e.preventDefault();
-            resetAllDailyLimits();
-        });
-    }
-    
-    if (navSettings) {
-        navSettings.addEventListener('click', function(e) {
-            e.preventDefault();
-            loadSettings();
-            settingsModal.show();
-        });
-    }
-    
-    // Documentation Event Listeners
-    if (navDocumentation) {
-        navDocumentation.addEventListener('click', function(e) {
-            e.preventDefault();
-            showDocumentationModal();
-        });
-    }
-    
-    if (navBeginnerGuide) {
-        navBeginnerGuide.addEventListener('click', function(e) {
-            e.preventDefault();
-            openDocumentationWindow('BEGINNER-GUIDE.md');
-        });
-    }
-    
-    if (navShortcuts) {
-        navShortcuts.addEventListener('click', function(e) {
-            e.preventDefault();
-            keyboardShortcutsModal.show();
-        });
-    }
-    
-    // New Tools Functions
-    
-    // Quick Search functionality with debouncing for better performance
-    let searchTimeout;
-    document.getElementById('quick-search-input').addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase();
-        const resultsContainer = document.getElementById('quick-search-results');
-        
-        // Clear previous timeout
-        clearTimeout(searchTimeout);
-        
-        // Add loading animation
-        if (searchTerm.length >= 2) {
-            resultsContainer.innerHTML = '<div class="text-center p-3"><div class="spinner-border spinner-border-sm text-primary" role="status"></div> Αναζήτηση...</div>';
-        }
-        
-        // Debounce search to avoid excessive calls
-        searchTimeout = setTimeout(() => {
-            performQuickSearch(searchTerm, resultsContainer);
-        }, 300);
-    });
-    
-    // Separate function for performing search with animations
-    function performQuickSearch(searchTerm, resultsContainer) {
-        if (searchTerm.length < 2) {
-            resultsContainer.innerHTML = '<div class="text-muted text-center p-3 fade-in">Πληκτρολογήστε τουλάχιστον 2 χαρακτήρες</div>';
-            return;
-        }
-        
-        const children = safeGetFromStorage('pitsasChildren', []);
-        const filteredChildren = children.filter(child => {
-            const fullName = `${child.firstName} ${child.lastName}`.toLowerCase();
-            const campId = (child.campId || '').toLowerCase();
-            return fullName.includes(searchTerm) || campId.includes(searchTerm);
-        });
-        
-        if (filteredChildren.length === 0) {
-            resultsContainer.innerHTML = '<div class="text-muted text-center p-3 fade-in">Δεν βρέθηκαν αποτελέσματα</div>';
-            return;
-        }
-        
-        // Add animation classes to results
-        resultsContainer.innerHTML = filteredChildren.map((child, index) => `
-            <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center search-result-item" style="animation-delay: ${index * 0.05}s">
-                <div>
-                    <h6 class="mb-1">${child.firstName} ${child.lastName}</h6>
-                    <small class="text-muted">ID: ${child.campId || 'N/A'} | Ομάδα: ${child.group} | Υπόλοιπο: ${child.balance.toFixed(2)}€</small>
-                </div>
-                <div class="btn-group btn-group-sm">
-                    <button class="btn btn-outline-success btn-animated" onclick="quickDeposit('${child.id}')">
-                        <i class="bi bi-cash-coin"></i>
-                    </button>
-                    <button class="btn btn-outline-warning btn-animated" onclick="quickWithdraw('${child.id}')">
-                        <i class="bi bi-cash"></i>
-                    </button>
-                </div>
-            </div>
-        `).join('');
-    }
-    
-    // Quick transaction functions
-    window.quickDeposit = function(childId) {
-        quickSearchModal.hide();
-        setTimeout(() => {
-            prepareTransactionModal('deposit', childId);
-        }, 300);
-    };
-    
-    window.quickWithdraw = function(childId) {
-        quickSearchModal.hide();
-        setTimeout(() => {
-            prepareTransactionModal('withdraw', childId);
-        }, 300);
-    };
-    
-    // Bulk Deposit functionality
-    function prepareBulkDeposit() {
-        const children = safeGetFromStorage('pitsasChildren', []);
-        updateBulkChildrenList(children);
-        
-        // Set today's date as default amount date
-        document.getElementById('bulk-amount').value = '';
-        document.getElementById('bulk-notes').value = '';
-        document.getElementById('bulk-group-filter').value = '';
-        
-        // Add group filter listener
-        document.getElementById('bulk-group-filter').addEventListener('change', function() {
-            const selectedGroup = this.value;
-            const filteredChildren = selectedGroup ? 
-                children.filter(child => child.group === selectedGroup) : children;
-            updateBulkChildrenList(filteredChildren);
-        });
-    }
-    
-    function updateBulkChildrenList(children) {
-        const container = document.getElementById('bulk-children-list');
-        const countBadge = document.getElementById('bulk-selected-count');
-        
-        container.innerHTML = children.map(child => `
-            <div class="form-check mb-2">
-                <input class="form-check-input bulk-child-checkbox" type="checkbox" value="${child.id}" id="bulk-${child.id}">
-                <label class="form-check-label w-100" for="bulk-${child.id}">
-                    <div class="d-flex justify-content-between">
-                        <span><strong>${child.firstName} ${child.lastName}</strong></span>
-                        <small class="text-muted">${child.group} | ${child.balance.toFixed(2)}€</small>
-                    </div>
-                </label>
-            </div>
-        `).join('');
-        
-        // Update count and enable/disable button
-        const checkboxes = container.querySelectorAll('.bulk-child-checkbox');
-        checkboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                const selectedCount = container.querySelectorAll('.bulk-child-checkbox:checked').length;
-                countBadge.textContent = selectedCount;
-                document.getElementById('execute-bulk-deposit').disabled = selectedCount === 0;
-            });
-        });
-        
-        countBadge.textContent = '0';
-        document.getElementById('execute-bulk-deposit').disabled = true;
-    }
-    
-    // Execute bulk deposit
-    document.getElementById('execute-bulk-deposit').addEventListener('click', function() {
-        const amount = parseFloat(document.getElementById('bulk-amount').value);
-        const notes = document.getElementById('bulk-notes').value;
-        const selectedCheckboxes = document.querySelectorAll('.bulk-child-checkbox:checked');
-        
-        if (!amount || amount <= 0) {
-            showNotification('Παρακαλώ εισάγετε έγκυρο ποσό!', 'warning');
-            return;
-        }
-        
-        const selectedChildIds = Array.from(selectedCheckboxes).map(cb => cb.value);
-        const children = safeGetFromStorage('pitsasChildren', []);
-        const transactions = safeGetFromStorage('pitsasTransactions', []);
-        const currentUser = safeParseJSON(sessionStorage.getItem('currentUser'), {});
-        
-        // Process bulk deposits
-        let successCount = 0;
-        selectedChildIds.forEach(childId => {
-            const childIndex = children.findIndex(c => c.id === childId);
-            if (childIndex !== -1) {
-                const child = children[childIndex];
-                const oldBalance = child.balance;
-                child.balance += amount;
-                
-                // Create transaction
-                const transaction = {
-                    id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-                    childId,
-                    type: 'deposit',
-                    amount,
-                    date: new Date().toISOString(),
-                    staff: currentUser.name || 'Άγνωστος',
-                    notes: notes + ' [ΟΜΑΔΙΚΗ ΚΑΤΑΘΕΣΗ]',
-                    oldBalance,
-                    newBalance: child.balance,
-                    limitOverride: false
-                };
-                
-                transactions.push(transaction);
-                successCount++;
-            }
-        });
-        
-        // Save changes
-        safeSetToStorage('pitsasChildren', children);
-        safeSetToStorage('pitsasTransactions', transactions);
-        
-        bulkDepositModal.hide();
-        showNotification(`Εκτελέστηκαν ${successCount} καταθέσεις επιτυχώς!`, 'success');
-        
-        // Refresh current view
-        if (!dashboardView.classList.contains('d-none')) {
-            loadDashboard();
-        } else if (!childrenView.classList.contains('d-none')) {
-            loadChildren();
-        }
-    });
-    
-    // Daily Report functionality
-    function setupDailyReport() {
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('report-date').value = today;
-    }
-    
-    document.getElementById('generate-daily-report').addEventListener('click', function() {
-        const reportDate = document.getElementById('report-date').value;
-        if (!reportDate) {
-            showNotification('Παρακαλώ επιλέξτε ημερομηνία!', 'warning');
-            return;
-        }
-        
-        const children = safeGetFromStorage('pitsasChildren', []);
-        const transactions = safeGetFromStorage('pitsasTransactions', []);
-        
-        // Filter transactions for the selected date
-        const dayTransactions = transactions.filter(t => 
-            t.date.startsWith(reportDate)
-        );
-        
-        const deposits = dayTransactions.filter(t => t.type === 'deposit');
-        const withdrawals = dayTransactions.filter(t => t.type === 'withdraw');
-        
-        const totalDeposits = deposits.reduce((sum, t) => sum + t.amount, 0);
-        const totalWithdrawals = withdrawals.reduce((sum, t) => sum + t.amount, 0);
-        
-        // Generate report HTML
-        const reportHTML = `
-            <div class="daily-report">
-                <div class="text-center mb-4">
-                    <h3>Ημερήσια Αναφορά</h3>
-                    <h5>${new Date(reportDate).toLocaleDateString('el-GR')}</h5>
-                </div>
-                
-                <div class="row mb-4">
-                    <div class="col-md-3">
-                        <div class="card text-white bg-info">
-                            <div class="card-body text-center">
-                                <h6>Συναλλαγές</h6>
-                                <h3>${dayTransactions.length}</h3>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card text-white bg-success">
-                            <div class="card-body text-center">
-                                <h6>Καταθέσεις</h6>
-                                <h3>${totalDeposits.toFixed(2)}€</h3>
-                                <small>${deposits.length} συναλλαγές</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card text-white bg-warning">
-                            <div class="card-body text-center">
-                                <h6>Αναλήψεις</h6>
-                                <h3>${totalWithdrawals.toFixed(2)}€</h3>
-                                <small>${withdrawals.length} συναλλαγές</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card text-white bg-primary">
-                            <div class="card-body text-center">
-                                <h6>Καθαρή Ροή</h6>
-                                <h3>${(totalDeposits - totalWithdrawals).toFixed(2)}€</h3>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="row">
-                    <div class="col-12">
-                        <h5>Λεπτομερείς Συναλλαγές</h5>
-                        <div class="table-responsive">
-                            <table class="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Ώρα</th>
-                                        <th>Παιδί</th>
-                                        <th>Τύπος</th>
-                                        <th>Ποσό</th>
-                                        <th>Υπάλληλος</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${dayTransactions.length === 0 ? 
-                                        '<tr><td colspan="5" class="text-center">Δεν υπάρχουν συναλλαγές για αυτή την ημερομηνία</td></tr>' :
-                                        dayTransactions.map(t => {
-                                            const child = children.find(c => c.id === t.childId);
-                                            const childName = child ? `${child.firstName} ${child.lastName}` : 'Άγνωστο';
-                                            const time = new Date(t.date).toLocaleTimeString('el-GR');
-                                            const typeClass = t.type === 'deposit' ? 'text-success' : 'text-warning';
-                                            const typeText = t.type === 'deposit' ? 'Κατάθεση' : 'Ανάληψη';
-                                            
-                                            return `
-                                                <tr>
-                                                    <td>${time}</td>
-                                                    <td>${childName}</td>
-                                                    <td class="${typeClass}">${typeText}</td>
-                                                    <td class="${typeClass}">${t.amount.toFixed(2)}€</td>
-                                                    <td>${t.staff}</td>
-                                                </tr>
-                                            `;
-                                        }).join('')
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        document.getElementById('daily-report-content').innerHTML = reportHTML;
-        document.getElementById('print-daily-report').disabled = false;
-    });
-    
-    document.getElementById('print-daily-report').addEventListener('click', function() {
-        printElement('daily-report-content');
-    });
-    
-    // Settings functionality
-    function loadSettings() {
-        const settings = safeGetFromStorage('pitsasSettings', {
-            itemsPerPage: 10,
-            defaultDailyLimit: 5,
-            autoBackup: false,
-            soundNotifications: true,
-            darkMode: false,
-            keyboardShortcuts: true,
-            smartAlerts: true
-        });
-        
-        document.getElementById('settings-items-per-page').value = settings.itemsPerPage || 10;
-        document.getElementById('settings-default-limit').value = settings.defaultDailyLimit || 5;
-        document.getElementById('settings-auto-backup').checked = settings.autoBackup || false;
-        document.getElementById('settings-sound-notifications').checked = settings.soundNotifications !== false;
-        document.getElementById('settings-dark-mode').checked = settings.darkMode || false;
-        document.getElementById('settings-keyboard-shortcuts').checked = settings.keyboardShortcuts !== false;
-        document.getElementById('settings-smart-alerts').checked = settings.smartAlerts !== false;
-    }
-    
-    document.getElementById('save-settings').addEventListener('click', function() {
-        const settings = {
-            itemsPerPage: parseInt(document.getElementById('settings-items-per-page').value),
-            defaultDailyLimit: parseFloat(document.getElementById('settings-default-limit').value),
-            autoBackup: document.getElementById('settings-auto-backup').checked,
-            soundNotifications: document.getElementById('settings-sound-notifications').checked,
-            darkMode: document.getElementById('settings-dark-mode').checked,
-            keyboardShortcuts: document.getElementById('settings-keyboard-shortcuts').checked,
-            smartAlerts: document.getElementById('settings-smart-alerts').checked
-        };
-        
-        safeSetToStorage('pitsasSettings', settings);
-        settingsModal.hide();
-        showNotification('Οι ρυθμίσεις αποθηκεύτηκαν επιτυχώς!', 'success');
-        
-        // Apply dark mode if changed
-        if (settings.darkMode !== document.body.classList.contains('dark-mode')) {
-            toggleDarkMode();
-        }
-    });
-    
-    // Test sound button functionality
-    document.getElementById('test-sound-btn').addEventListener('click', function() {
-        const isEnabled = document.getElementById('settings-sound-notifications').checked;
-        if (!isEnabled) {
-            // Temporarily enable sound for test
-            const tempSettings = { soundNotifications: true };
-            const originalStorage = safeGetFromStorage('pitsasSettings', {});
-            safeSetToStorage('pitsasSettings', tempSettings);
-            playNotificationSound('success');
-            // Restore original settings
-            setTimeout(() => {
-                safeSetToStorage('pitsasSettings', originalStorage);
-            }, 1000);
-        } else {
-            playNotificationSound('success');
-        }
-        showNotification('Δοκιμή ηχητικής ειδοποίησης!', 'info');
-    });
-    
-    // Utility functions for new tools
-    function generateLimitsReport() {
-        const children = safeGetFromStorage('pitsasChildren', []);
-        const childrenWithLimits = children.filter(c => c.dailyLimit > 0);
-        
-        if (childrenWithLimits.length === 0) {
-            showNotification('Δεν υπάρχουν παιδιά με ημερήσια όρια!', 'info');
-            return;
-        }
-        
-        showView(statisticsView);
-        setActiveLink(statisticsLink);
-        loadStatistics();
-        updateBreadcrumbs('statistics');
-        
-        // Scroll to limits section
-        setTimeout(() => {
-            const limitsSection = document.getElementById('limit-stats-container');
-            if (limitsSection) {
-                limitsSection.scrollIntoView({ behavior: 'smooth' });
-            }
-        }, 500);
-        
-        showNotification('Αναφορά ημερήσιων ορίων φορτώθηκε στη σελίδα Στατιστικών', 'info');
-    }
-    
-    function exportFullStatistics() {
-        const children = safeGetFromStorage('pitsasChildren', []);
-        const transactions = safeGetFromStorage('pitsasTransactions', []);
-        
-        // Prepare comprehensive statistics
-        const stats = {
-            generatedAt: new Date().toISOString(),
-            summary: {
-                totalChildren: children.length,
-                totalBalance: children.reduce((sum, child) => sum + child.balance, 0),
-                totalTransactions: transactions.length,
-                totalDeposits: transactions.filter(t => t.type === 'deposit').reduce((sum, t) => sum + t.amount, 0),
-                totalWithdrawals: transactions.filter(t => t.type === 'withdraw').reduce((sum, t) => sum + t.amount, 0)
-            },
-            children: children,
-            transactions: transactions
-        };
-        
-        // Export as JSON
-        const dataStr = JSON.stringify(stats, null, 2);
-        const dataBlob = new Blob([dataStr], { type: 'application/json' });
-        const url = URL.createObjectURL(dataBlob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `pitsas_camp_full_statistics_${new Date().toISOString().split('T')[0]}.json`;
-        link.click();
-        URL.revokeObjectURL(url);
-        
-        showNotification('Τα πλήρη στατιστικά εξάχθηκαν επιτυχώς!', 'success');
-    }
-    
-    function resetAllDailyLimits() {
-        if (!confirm('Είστε σίγουροι ότι θέλετε να επαναφέρετε όλα τα ημερήσια όρια; Αυτή η ενέργεια θα μηδενίσει τα σημερινά έξοδα όλων των παιδιών.')) {
-            return;
-        }
-        
-        const children = safeGetFromStorage('pitsasChildren', []);
-        const today = new Date().toISOString().split('T')[0];
-        
-        children.forEach(child => {
-            child.todaySpent = 0;
-            child.lastSpendingReset = today;
-        });
-        
-        safeSetToStorage('pitsasChildren', children);
-        showNotification('Όλα τα ημερήσια όρια επαναφέρθηκαν επιτυχώς!', 'success');
-        
-        // Refresh current view
-        if (!dashboardView.classList.contains('d-none')) {
-            loadDashboard();
-        } else if (!childrenView.classList.contains('d-none')) {
-            loadChildren();
-        }
-    }
-    
-    // Initialize animations and performance optimizations
-    function initializeAnimations() {
-        // Add fade-in to main containers
-        const containers = document.querySelectorAll('.container, .card, .modal-content');
-        containers.forEach((container, index) => {
-            container.style.animationDelay = `${index * 0.1}s`;
-            container.classList.add('fade-in');
-        });
-        
-        // Add hover effects to dashboard cards
-        const dashboardCards = document.querySelectorAll('.dashboard-card');
-        dashboardCards.forEach(card => {
-            card.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-2px)';
-            });
-            card.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0)';
-            });
-        });
-        
-        // Optimize animations for performance
-        if (window.DeviceMotionEvent && 'ontouchstart' in window) {
-            // Reduce animations on mobile devices
-            document.body.classList.add('mobile-optimized');
-        }
-    }
-    
-    // Enhanced modal keyboard navigation
-    function initializeModalKeyboardSupport() {
-        // Add Enter key support for all modals
-        document.addEventListener('keydown', function(e) {
-            // Don't trigger if user is typing in an input field
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
-                return;
-            }
-            
-            const openModal = document.querySelector('.modal.show');
-            if (!openModal) return;
-            
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                
-                // Handle specific modals
-                const modalId = openModal.id;
-                
-                switch(modalId) {
-                    case 'receiptModal':
-                    case 'idCardModal':
-                        // Close these modals with Enter
-                        const modalInstance = bootstrap.Modal.getInstance(openModal);
-                        if (modalInstance) modalInstance.hide();
-                        break;
-                        
-                    case 'transactionModal':
-                        // Submit transaction with Enter
-                        const submitBtn = document.getElementById('save-transaction-btn');
-                        if (submitBtn && !submitBtn.disabled) {
-                            submitBtn.click();
-                        }
-                        break;
-                        
-                    case 'addChildModal':
-                        // Submit child form with Enter
-                        const saveChildBtn = document.getElementById('save-child-btn');
-                        if (saveChildBtn && !saveChildBtn.disabled) {
-                            saveChildBtn.click();
-                        }
-                        break;
-                        
-                    default:
-                        // For other modals, find the primary button and click it
-                        const primaryBtn = openModal.querySelector('.btn-primary:not(:disabled)');
-                        if (primaryBtn) {
-                            primaryBtn.click();
-                        }
-                        break;
-                }
-            }
-        });
-        
-        // Fix focus issues με modals
-        document.addEventListener('shown.bs.modal', function(e) {
-            // Όταν ανοίγει modal, focus στο πρώτο input
-            const modal = e.target;
-            const firstInput = modal.querySelector('input:not([type="hidden"]), textarea, select');
-            if (firstInput) {
-                setTimeout(() => {
-                    firstInput.focus();
-                }, 100);
-            }
-        });
-        
-        document.addEventListener('hidden.bs.modal', function(e) {
-            // Όταν κλείνει modal, επαναφορά focus στο body
-            setTimeout(() => {
-                document.body.focus();
-                // Εάν είμαστε σε Electron, focus στο webContents
-                if (window.electronAPI) {
-                    window.focus();
-                }
-            }, 100);
-        });
-    }
-    
-    // Initialize breadcrumbs
-    updateBreadcrumbs('dashboard');
-    
-    // Initialize dark mode
-    initializeDarkMode();
-    
-    // Initialize keyboard shortcuts
-    setTimeout(() => {
-        initializeKeyboardShortcuts();
-        console.log('Keyboard shortcuts initialized');
-    }, 100);
-    
-    // Initialize smart alerts
-    initializeSmartAlerts();
-    
-    // Initialize animations
-    initializeAnimations();
-    
-    // Initialize modal keyboard support
-    initializeModalKeyboardSupport();
-    
-    // Function to initialize dark mode on app load
-    function initializeDarkMode() {
-        const settings = safeGetFromStorage('pitsasSettings', {});
-        if (settings.darkMode) {
-            document.body.classList.add('dark-mode');
-            toggleDarkMode();
-        }
-    }
-    
-    // Keyboard Shortcuts System
-    function initializeKeyboardShortcuts() {
-        const settings = safeGetFromStorage('pitsasSettings', { keyboardShortcuts: true });
-        if (!settings.keyboardShortcuts) return;
-        
-        // Verify that all required modals exist before setting up shortcuts
-        const requiredElements = [
-            'addChildModal', 'quickSearchModal', 'backupModal', 'settingsModal',
-            'advancedSearchModal', 'keyboardShortcutsModal'
-        ];
-        
-        for (const elementId of requiredElements) {
-            if (!document.getElementById(elementId)) {
-                console.warn(`Element ${elementId} not found, keyboard shortcuts may not work properly`);
-            }
-        }
-        
-        document.addEventListener('keydown', function(e) {
-            // Don't trigger shortcuts when typing in inputs
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.contentEditable === 'true') {
-                return;
-            }
-            
-            // Ctrl + combinations
-            if (e.ctrlKey && !e.shiftKey && !e.altKey) {
-                switch(e.key.toLowerCase()) {
-                    case 'n':
-                        e.preventDefault();
-                        e.stopPropagation();
-                        if (addChildModal) addChildModal.show();
-                        break;
-                    case 'f':
-                        e.preventDefault();
-                        e.stopPropagation();
-                        if (quickSearchModal) quickSearchModal.show();
-                        setTimeout(() => {
-                            const searchInput = document.getElementById('quick-search-input');
-                            if (searchInput) searchInput.focus();
-                        }, 100);
-                        break;
-                    case 'd':
-                        e.preventDefault();
-                        e.stopPropagation();
-                        prepareTransactionModal('deposit');
-                        break;
-                    case 'w':
-                        e.preventDefault();
-                        e.stopPropagation();
-                        prepareTransactionModal('withdraw');
-                        break;
-                    case 'b':
-                        e.preventDefault();
-                        e.stopPropagation();
-                        if (backupModal) backupModal.show();
-                        break;
-                    case ',':
-                        e.preventDefault();
-                        e.stopPropagation();
-                        if (settingsModal) settingsModal.show();
-                        break;
-                }
-            }
-            
-            // Ctrl + Shift combinations
-            if (e.ctrlKey && e.shiftKey && !e.altKey) {
-                switch(e.key.toLowerCase()) {
-                    case 'f':
-                        e.preventDefault();
-                        e.stopPropagation();
-                        if (advancedSearchModal) advancedSearchModal.show();
-                        setTimeout(() => {
-                            const advSearchInput = document.getElementById('adv-search-text');
-                            if (advSearchInput) advSearchInput.focus();
-                        }, 100);
-                        break;
-                    case 'r':
-                        // Ctrl+Shift+R για Emergency Backup Recovery
-                        e.preventDefault();
-                        e.stopPropagation();
-                        if (typeof showEmergencyBackupInfo === 'function') {
-                            showEmergencyBackupInfo();
-                        }
-                        break;
-                }
-            }
-            
-            // Alt + number combinations for navigation
-            if (e.altKey && !e.ctrlKey && !e.shiftKey) {
-                switch(e.key) {
-                    case '1':
-                        e.preventDefault();
-                        e.stopPropagation();
-                        if (dashboardView && dashboardLink) {
-                            showView(dashboardView);
-                            setActiveLink(dashboardLink);
-                            updateBreadcrumbs('dashboard');
-                        }
-                        break;
-                    case '2':
-                        e.preventDefault();
-                        e.stopPropagation();
-                        if (childrenView && childrenLink) {
-                            showView(childrenView);
-                            setActiveLink(childrenLink);
-                            loadChildren();
-                            updateBreadcrumbs('children');
-                        }
-                        break;
-                    case '3':
-                        e.preventDefault();
-                        e.stopPropagation();
-                        if (transactionsView && transactionsLink) {
-                            showView(transactionsView);
-                            setActiveLink(transactionsLink);
-                            loadTransactions();
-                            updateBreadcrumbs('transactions');
-                        }
-                        break;
-                    case '4':
-                        e.preventDefault();
-                        e.stopPropagation();
-                        if (statisticsView && statisticsLink) {
-                            showView(statisticsView);
-                            setActiveLink(statisticsLink);
-                            loadStatistics();
-                            updateBreadcrumbs('statistics');
-                        }
-                        break;
-                }
-            }
-            
-            // F1 for help
-            if (e.key === 'F1') {
-                e.preventDefault();
-                e.stopPropagation();
-                if (keyboardShortcutsModal) keyboardShortcutsModal.show();
-            }
-            
-            // Escape to close modals
-            if (e.key === 'Escape') {
-                e.preventDefault();
-                e.stopPropagation();
-                const openModals = document.querySelectorAll('.modal.show');
-                if (openModals.length > 0) {
-                    const modalInstance = bootstrap.Modal.getInstance(openModals[openModals.length - 1]);
-                    if (modalInstance) modalInstance.hide();
-                }
-            }
-        }, true); // Use capture mode to handle events before they bubble
-    }
-    
-    // Smart Alerts System
-    function initializeSmartAlerts() {
-        const settings = safeGetFromStorage('pitsasSettings', { smartAlerts: true });
-        if (!settings.smartAlerts) return;
-        
-        // Check for alerts every 30 seconds
-        setInterval(checkSmartAlerts, 30000);
-        
-        // Run initial check after 5 seconds
-        setTimeout(checkSmartAlerts, 5000);
-    }
-    
-    function checkSmartAlerts() {
-        const settings = safeGetFromStorage('pitsasSettings', { smartAlerts: true });
-        if (!settings.smartAlerts) return;
-        
-        const children = safeGetFromStorage('pitsasChildren', []);
-        const transactions = safeGetFromStorage('pitsasTransactions', []);
-        const today = new Date().toISOString().split('T')[0];
-        
-        // Check for low balances
-        const lowBalanceChildren = children.filter(child => child.balance < 2 && child.balance > 0);
-        if (lowBalanceChildren.length > 0) {
-            showSmartAlert(
-                'warning',
-                'Χαμηλά Υπόλοιπα',
-                `${lowBalanceChildren.length} παιδιά έχουν υπόλοιπο κάτω από 2€`,
-                'low-balance'
-            );
-        }
-        
-        // Check for children who exceeded daily limits
-        const exceededLimitChildren = children.filter(child => {
-            if (!child.dailyLimit || child.dailyLimit === 0) return false;
-            const todaySpent = child.todaySpent || 0;
-            return todaySpent > child.dailyLimit;
-        });
-        
-        if (exceededLimitChildren.length > 0) {
-            showSmartAlert(
-                'danger',
-                'Υπέρβαση Ορίων',
-                `${exceededLimitChildren.length} παιδιά έχουν υπερβεί το ημερήσιο όριό τους`,
-                'exceeded-limits'
-            );
-        }
-        
-        // Check for inactive children (no transactions in last 3 days)
-        const threeDaysAgo = new Date();
-        threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
-        const recentTransactions = transactions.filter(t => new Date(t.date) >= threeDaysAgo);
-        const activeChildrenIds = new Set(recentTransactions.map(t => t.childId));
-        const inactiveChildren = children.filter(child => !activeChildrenIds.has(child.id) && child.balance > 0);
-        
-        if (inactiveChildren.length > 5) {
-            showSmartAlert(
-                'info',
-                'Αδρανή Παιδιά',
-                `${inactiveChildren.length} παιδιά δεν έχουν κάνει συναλλαγές τις τελευταίες 3 ημέρες`,
-                'inactive-children'
-            );
-        }
-        
-        // Check for high transaction day
-        const todayTransactions = transactions.filter(t => t.date.startsWith(today));
-        if (todayTransactions.length > 50) {
-            showSmartAlert(
-                'info',
-                'Πολυάσχολη Ημέρα',
-                `Υψηλή δραστηριότητα σήμερα: ${todayTransactions.length} συναλλαγές`,
-                'busy-day'
-            );
-        }
-    }
-    
-    let activeSmartAlerts = new Set();
-    
-    function showSmartAlert(type, title, message, alertId) {
-        if (activeSmartAlerts.has(alertId)) return; // Don't show duplicate alerts
-        
-        activeSmartAlerts.add(alertId);
-        
-        const alertContainer = document.getElementById('smart-alerts-container');
-        const alert = document.createElement('div');
-        alert.className = `alert alert-${type} alert-dismissible fade show shadow-sm smart-alert smart-alert-slide-in`;
-        alert.setAttribute('data-alert-id', alertId);
-        
-        alert.innerHTML = `
-            <div class="d-flex align-items-center">
-                <i class="bi bi-lightbulb me-2 smart-alert-pulse"></i>
-                <div>
-                    <strong>${title}</strong><br>
-                    <small>${message}</small>
-                </div>
-                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
-            </div>
-        `;
-        
-        alertContainer.appendChild(alert);
-        
-        // Auto-dismiss after 10 seconds
-        setTimeout(() => {
-            if (alert.parentNode) {
-                bootstrap.Alert.getInstance(alert)?.close();
-                activeSmartAlerts.delete(alertId);
-            }
-        }, 10000);
-        
-        // Remove from active alerts when dismissed
-        alert.addEventListener('closed.bs.alert', () => {
-            activeSmartAlerts.delete(alertId);
-        });
-        
-        // Play sound if enabled
-        playNotificationSound(type);
-    }
-    
-    // Advanced Search System
-    // (Modals are declared at the top of the file)
-    
-    // Advanced search event listeners
-    document.getElementById('nav-advanced-search').addEventListener('click', function(e) {
-        e.preventDefault();
-        advancedSearchModal.show();
-        setTimeout(() => document.getElementById('adv-search-text').focus(), 100);
-    });
-    
-    document.getElementById('execute-advanced-search').addEventListener('click', executeAdvancedSearch);
-    document.getElementById('clear-advanced-search').addEventListener('click', clearAdvancedSearch);
-    document.getElementById('save-search-preset').addEventListener('click', saveSearchPreset);
-    
-    function executeAdvancedSearch() {
-        const searchParams = {
-            text: document.getElementById('adv-search-text').value.toLowerCase(),
-            category: document.getElementById('adv-search-category').value,
-            group: document.getElementById('adv-search-group').value,
-            ageMin: parseInt(document.getElementById('adv-search-age-min').value) || null,
-            ageMax: parseInt(document.getElementById('adv-search-age-max').value) || null,
-            balanceMin: parseFloat(document.getElementById('adv-search-balance-min').value) || null,
-            balanceMax: parseFloat(document.getElementById('adv-search-balance-max').value) || null,
-            limitStatus: document.getElementById('adv-search-limit-status').value,
-            dateFrom: document.getElementById('adv-search-date-from').value,
-            dateTo: document.getElementById('adv-search-date-to').value
-        };
-        
-        const children = safeGetFromStorage('pitsasChildren', []);
-        const transactions = safeGetFromStorage('pitsasTransactions', []);
-        
-        let results = {
-            children: [],
-            transactions: [],
-            groups: []
-        };
-        
-        // Search children
-        if (searchParams.category === 'all' || searchParams.category === 'children') {
-            results.children = children.filter(child => {
-                // Text search
-                if (searchParams.text) {
-                    const fullName = `${child.firstName} ${child.lastName}`.toLowerCase();
-                    const campId = (child.campId || '').toLowerCase();
-                    if (!fullName.includes(searchParams.text) && !campId.includes(searchParams.text)) {
-                        return false;
-                    }
-                }
-                
-                // Group filter
-                if (searchParams.group && child.group !== searchParams.group) {
-                    return false;
-                }
-                
-                // Age filter
-                if (searchParams.ageMin && child.age < searchParams.ageMin) {
-                    return false;
-                }
-                if (searchParams.ageMax && child.age > searchParams.ageMax) {
-                    return false;
-                }
-                
-                // Balance filter
-                if (searchParams.balanceMin && child.balance < searchParams.balanceMin) {
-                    return false;
-                }
-                if (searchParams.balanceMax && child.balance > searchParams.balanceMax) {
-                    return false;
-                }
-                
-                // Limit status filter
-                if (searchParams.limitStatus) {
-                    const todaySpent = child.todaySpent || 0;
-                    const dailyLimit = child.dailyLimit || 0;
-                    
-                    switch (searchParams.limitStatus) {
-                        case 'exceeded':
-                            if (dailyLimit === 0 || todaySpent <= dailyLimit) return false;
-                            break;
-                        case 'near-limit':
-                            if (dailyLimit === 0 || todaySpent < dailyLimit * 0.8 || todaySpent > dailyLimit) return false;
-                            break;
-                        case 'under-limit':
-                            if (dailyLimit > 0 && todaySpent >= dailyLimit * 0.8) return false;
-                            break;
-                    }
-                }
-                
-                return true;
-            });
-        }
-        
-        // Search transactions
-        if (searchParams.category === 'all' || searchParams.category === 'transactions') {
-            results.transactions = transactions.filter(transaction => {
-                // Text search
-                if (searchParams.text) {
-                    const child = children.find(c => c.id === transaction.childId);
-                    const childName = child ? `${child.firstName} ${child.lastName}`.toLowerCase() : '';
-                    const staff = transaction.staff.toLowerCase();
-                    const notes = (transaction.notes || '').toLowerCase();
-                    
-                    if (!childName.includes(searchParams.text) && 
-                        !staff.includes(searchParams.text) && 
-                        !notes.includes(searchParams.text)) {
-                        return false;
-                    }
-                }
-                
-                // Date filter
-                const transactionDate = transaction.date.split('T')[0];
-                if (searchParams.dateFrom && transactionDate < searchParams.dateFrom) {
-                    return false;
-                }
-                if (searchParams.dateTo && transactionDate > searchParams.dateTo) {
-                    return false;
-                }
-                
-                return true;
-            });
-        }
-        
-        displayAdvancedSearchResults(results, searchParams);
-    }
-    
-    function displayAdvancedSearchResults(results, searchParams) {
-        const resultsContainer = document.getElementById('advanced-search-results');
-        
-        let html = `<div class="search-results">`;
-        
-        // Summary
-        const totalResults = results.children.length + results.transactions.length;
-        html += `<div class="alert alert-info">
-            <i class="bi bi-info-circle me-2"></i>
-            Βρέθηκαν <strong>${totalResults}</strong> αποτελέσματα
-            (${results.children.length} παιδιά, ${results.transactions.length} συναλλαγές)
-        </div>`;
-        
-        // Children results
-        if (results.children.length > 0) {
-            html += `<div class="mb-4">
-                <h6><i class="bi bi-people me-2"></i>Παιδιά (${results.children.length})</h6>
-                <div class="table-responsive">
-                    <table class="table table-sm table-hover">
-                        <thead>
-                            <tr>
-                                <th>Όνομα</th>
-                                <th>Ομάδα</th>
-                                <th>Ηλικία</th>
-                                <th>Υπόλοιπο</th>
-                                <th>Ενέργειες</th>
-                            </tr>
-                        </thead>
-                        <tbody>`;
-            
-            results.children.forEach(child => {
-                html += `<tr>
-                    <td>${child.firstName} ${child.lastName}</td>
-                    <td>${child.group}</td>
-                    <td>${child.age}</td>
-                    <td>${child.balance.toFixed(2)}€</td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-success" onclick="quickSearchDeposit('${child.id}')">
-                            <i class="bi bi-cash-coin"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-warning" onclick="quickSearchWithdraw('${child.id}')">
-                            <i class="bi bi-cash"></i>
-                        </button>
-                    </td>
-                </tr>`;
-            });
-            
-            html += `</tbody></table></div></div>`;
-        }
-        
-        // Transactions results
-        if (results.transactions.length > 0) {
-            html += `<div class="mb-4">
-                <h6><i class="bi bi-credit-card me-2"></i>Συναλλαγές (${results.transactions.length})</h6>
-                <div class="table-responsive">
-                    <table class="table table-sm table-hover">
-                        <thead>
-                            <tr>
-                                <th>Ημερομηνία</th>
-                                <th>Παιδί</th>
-                                <th>Τύπος</th>
-                                <th>Ποσό</th>
-                                <th>Υπάλληλος</th>
-                            </tr>
-                        </thead>
-                        <tbody>`;
-            
-            const children = safeGetFromStorage('pitsasChildren', []);
-            results.transactions.slice(0, 20).forEach(transaction => { // Limit to 20 for performance
-                const child = children.find(c => c.id === transaction.childId);
-                const childName = child ? `${child.firstName} ${child.lastName}` : 'Άγνωστο';
-                const date = new Date(transaction.date).toLocaleDateString('el-GR');
-                const typeClass = transaction.type === 'deposit' ? 'text-success' : 'text-warning';
-                const typeText = transaction.type === 'deposit' ? 'Κατάθεση' : 'Ανάληψη';
-                
-                html += `<tr>
-                    <td>${date}</td>
-                    <td>${childName}</td>
-                    <td class="${typeClass}">${typeText}</td>
-                    <td>${transaction.amount.toFixed(2)}€</td>
-                    <td>${transaction.staff}</td>
-                </tr>`;
-            });
-            
-            if (results.transactions.length > 20) {
-                html += `<tr><td colspan="5" class="text-center text-muted">
-                    <small>Εμφανίζονται οι πρώτες 20 συναλλαγές από ${results.transactions.length} συνολικά</small>
-                </td></tr>`;
-            }
-            
-            html += `</tbody></table></div></div>`;
-        }
-        
-        if (totalResults === 0) {
-            html += `<div class="text-center text-muted py-4">
-                <i class="bi bi-search" style="font-size: 3rem;"></i>
-                <p class="mt-2">Δεν βρέθηκαν αποτελέσματα για τα κριτήρια αναζήτησης</p>
-            </div>`;
-        }
-        
-        html += `</div>`;
-        resultsContainer.innerHTML = html;
-    }
-    
-    function clearAdvancedSearch() {
-        document.getElementById('adv-search-text').value = '';
-        document.getElementById('adv-search-category').value = 'all';
-        document.getElementById('adv-search-group').value = '';
-        document.getElementById('adv-search-age-min').value = '';
-        document.getElementById('adv-search-age-max').value = '';
-        document.getElementById('adv-search-balance-min').value = '';
-        document.getElementById('adv-search-balance-max').value = '';
-        document.getElementById('adv-search-limit-status').value = '';
-        document.getElementById('adv-search-date-from').value = '';
-        document.getElementById('adv-search-date-to').value = '';
-        document.getElementById('advanced-search-results').innerHTML = '';
-    }
-    
-    function saveSearchPreset() {
-        const searchName = prompt('Δώστε όνομα για αυτή την αναζήτηση:');
-        if (!searchName) return;
-        
-        const searchParams = {
-            name: searchName,
-            text: document.getElementById('adv-search-text').value,
-            category: document.getElementById('adv-search-category').value,
-            group: document.getElementById('adv-search-group').value,
-            ageMin: document.getElementById('adv-search-age-min').value,
-            ageMax: document.getElementById('adv-search-age-max').value,
-            balanceMin: document.getElementById('adv-search-balance-min').value,
-            balanceMax: document.getElementById('adv-search-balance-max').value,
-            limitStatus: document.getElementById('adv-search-limit-status').value,
-            dateFrom: document.getElementById('adv-search-date-from').value,
-            dateTo: document.getElementById('adv-search-date-to').value
-        };
-        
-        const savedSearches = safeGetFromStorage('pitsa AdvancedSearchPresets', []);
-        savedSearches.push(searchParams);
-        safeSetToStorage('pitsasAdvancedSearchPresets', savedSearches);
-        
-        showNotification(`Η αναζήτηση "${searchName}" αποθηκεύτηκε επιτυχώς!`, 'success');
-    }
-    
-    // Quick action functions for search results
-    window.quickSearchDeposit = function(childId) {
-        advancedSearchModal.hide();
-        setTimeout(() => {
-            prepareTransactionModal('deposit', childId);
-        }, 300);
-    };
-    
-    window.quickSearchWithdraw = function(childId) {
-        advancedSearchModal.hide();
-        setTimeout(() => {
-            prepareTransactionModal('withdraw', childId);
-        }, 300);
-    };
-    
-    // Αρχικοποίηση αυτόματου backup συστήματος
-    initializeAutoBackup();
-    
-    // Fix για focus issues σε Electron - Simplified version
-    function initializeFocusFixes() {
-        console.log('Αρχικοποίηση simplified focus fixes...');
-        
-        // Μόνο βασικό focus management - χωρίς επιθετικότητα
-        // Removed aggressive click handler that was interfering with dropdowns
-        
-        // Enhanced keyboard navigation με dropdown protection
-        document.addEventListener('keydown', function(e) {
-            // Έλεγχος αν υπάρχει ανοιχτό dropdown
-            const openDropdown = document.querySelector('.dropdown-menu.show');
-            if (openDropdown) {
-                return; // Δεν παρεμβαίνουμε στα dropdowns
-            }
-            
-            // Tab handling με επιπλέον έλεγχο
-            if (e.key === 'Tab') {
-                setTimeout(() => {
-                    if (window.electronAPI) {
-                        window.electronAPI.focusMainWindow().catch(() => {
-                            window.focus();
-                        });
-                    }
-                    
-                    // Εάν δεν υπάρχει focused element, focus το body
-                    if (!document.activeElement || document.activeElement === document.body) {
-                        const inputs = document.querySelectorAll('input:not([type="hidden"]), textarea, select');
-                        for (let input of inputs) {
-                            if (input.offsetParent !== null && !input.disabled) {
-                                input.focus();
-                                break;
-                            }
-                        }
-                    }
-                }, 50);
-            }
-            
-            // Emergency focus restore με Ctrl+Alt+F
-            if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'f') {
-                e.preventDefault();
-                console.log('Emergency focus restore activated!');
-                
-                // Multiple fallbacks
-                if (window.electronAPI && window.electronAPI.restoreFocus) {
-                    window.electronAPI.restoreFocus().catch(err => {
-                        console.log('Emergency restore focus failed:', err.message);
-                    });
-                }
-                if (window.electronAPI && window.electronAPI.focusMainWindow) {
-                    window.electronAPI.focusMainWindow().catch(err => {
-                        console.log('Emergency focus main window failed:', err.message);
-                    });
-                }
-                
-                window.focus();
-                document.body.focus();
-                
-                // Focus σε κάποιο input
-                const searchInput = document.getElementById('searchInput');
-                if (searchInput && searchInput.style.display !== 'none') {
-                    searchInput.focus();
-                } else {
-                    const inputs = document.querySelectorAll('input:not([type="hidden"]), textarea');
-                    for (let input of inputs) {
-                        if (input.offsetParent !== null && !input.disabled) {
-                            input.focus();
-                            break;
-                        }
-                    }
-                }
-                
-                showNotification('Focus επαναφέρθηκε με force!', 'success');
-            }
-            
-            // F1 - Help/Documentation shortcut
-            if (e.key === 'F1') {
-                e.preventDefault();
-                showDocumentationModal();
-                return;
-            }
-            
-            // F2 - Beginner Guide shortcut  
-            if (e.key === 'F2') {
-                e.preventDefault();
-                openDocumentationWindow('BEGINNER-GUIDE.md');
-                return;
-            }
-            
-            // Escape key handling με dropdown protection
-            if (e.key === 'Escape') {
-                // Αν υπάρχει ανοιχτό dropdown, άφησε το Bootstrap να το χειριστεί
-                const openDropdown = document.querySelector('.dropdown-menu.show');
-                if (openDropdown) {
-                    return;
-                }
-                
-                setTimeout(() => {
-                    if (window.electronAPI) {
-                        window.electronAPI.focusMainWindow().catch(err => {
-                            console.log('Escape focus failed:', err.message);
-                        });
-                    }
-                    window.focus();
-                }, 50);
-            }
-        });
-        
-        // Window focus/blur events - DISABLED για να μη παρεμβαίνει με dropdowns
-        // Removed aggressive window focus/blur handlers that were causing interference
-        /*
-        window.addEventListener('focus', function() {
-            console.log('Window gained focus');
-            // Μη παρεμβαίνεις αν υπάρχει ανοιχτό dropdown
-            const openDropdown = document.querySelector('.dropdown-menu.show');
-            if (openDropdown) {
-                return;
-            }
-            
-            if (window.electronAPI && window.electronAPI.focusMainWindow) {
-                window.electronAPI.focusMainWindow().catch(err => {
-                    console.log('Window focus event failed:', err.message);
-                });
-            }
-        });
-        
-        window.addEventListener('blur', function() {
-            console.log('Window lost focus');
-            
-            // Μη παρεμβαίνεις αν υπάρχει ανοιχτό dropdown
-            const openDropdown = document.querySelector('.dropdown-menu.show');
-            if (openDropdown) {
-                return;
-            }
-            
-            // Αγρεσσική επαναφορά focus μετά από blur
-            setTimeout(() => {
-                const modalsOpen = document.querySelector('.modal.show');
-                if (!modalsOpen && window.electronAPI) {
-                    window.electronAPI.focusMainWindow().catch(() => {
-                        window.focus();
-                    });
-                }
-            }, 300);
-        });
-        */
-        
-        // Dropdown event handling για προστασία από focus interference
-        document.addEventListener('show.bs.dropdown', function(e) {
-            console.log('Dropdown opening:', e.target.id || 'unnamed');
-            // Σταματάμε το periodic focus check όσο είναι ανοιχτό dropdown
-            window.dropdownOpen = true;
-        });
-        
-        document.addEventListener('hide.bs.dropdown', function(e) {
-            console.log('Dropdown closing:', e.target.id || 'unnamed');
-            window.dropdownOpen = false;
-        });
-        
-        // Click handling με dropdown protection
-        document.addEventListener('click', function(e) {
-            // Αν κάνουμε κλικ σε dropdown toggle, μην παρεμβαίνουμε
-            if (e.target.closest('.dropdown-toggle') || e.target.closest('.dropdown-menu')) {
-                return;
-            }
-        });
-        
-        // Modal handling με enhanced support
-        document.addEventListener('show.bs.modal', function(e) {
-            console.log('Modal opening:', e.target.id);
-            setTimeout(() => {
-                const modal = e.target;
-                if (modal) {
-                    modal.focus();
-                    // Focus στο πρώτο focusable element
-                    const focusable = modal.querySelector('input, textarea, select, button:not([disabled])');
-                    if (focusable) {
-                        focusable.focus();
-                    }
-                }
-                
-                if (window.electronAPI) {
-                    window.electronAPI.focusMainWindow().catch(err => {
-                        console.log('Modal show focus failed:', err.message);
-                    });
-                }
-            }, 150);
-        });
-        
-        document.addEventListener('hidden.bs.modal', function(e) {
-            console.log('Modal closed:', e.target.id);
-            setTimeout(() => {
-                if (window.electronAPI) {
-                    window.electronAPI.restoreFocus().catch(err => {
-                        console.log('Modal hidden restore focus failed:', err.message);
-                    });
-                    window.electronAPI.focusMainWindow().catch(err => {
-                        console.log('Modal hidden focus main window failed:', err.message);
-                    });
-                }
-                
-                window.focus();
-                document.body.focus();
-                
-                // Focus restoration στο search input αν είναι ορατό
-                const searchInput = document.getElementById('searchInput');
-                if (searchInput && searchInput.style.display !== 'none' && !searchInput.disabled) {
-                    searchInput.focus();
-                } else {
-                    // Focus σε κάποιο άλλο input
-                    const inputs = document.querySelectorAll('input:not([type="hidden"]), textarea');
-                    for (let input of inputs) {
-                        if (input.offsetParent !== null && !input.disabled) {
-                            input.focus();
-                            break;
-                        }
-                    }
-                }
-            }, 200);
-        });
-        
-        // Periodic focus check - DISABLED για να μη παρεμβαίνει με dropdowns
-        // This was too aggressive and causing dropdown interference
-        /*
-        setInterval(() => {
-            const hasFocus = document.hasFocus();
-            const modalsOpen = document.querySelector('.modal.show');
-            const dropdownOpen = document.querySelector('.dropdown-menu.show') || window.dropdownOpen;
-            
-            // Μη παρεμβαίνεις αν υπάρχει ανοιχτό dropdown
-            if (!hasFocus && !modalsOpen && !dropdownOpen && window.electronAPI) {
-                console.log('Periodic focus restore attempt');
-                window.electronAPI.restoreFocus().catch(() => {
-                    window.focus();
-                    document.body.focus();
-                });
-            }
-        }, 5000); // Κάθε 5 δευτερόλεπτα
-        */
-        
-        // Document ready focus restoration
-        if (document.readyState === 'complete') {
-            setTimeout(() => {
-                if (window.electronAPI) {
-                    window.electronAPI.focusMainWindow().catch(err => {
-                        console.log('Document ready focus failed:', err.message);
-                    });
-                }
-                window.focus();
-            }, 100);
-        }
-    }
-    
-    // Αρχικοποίηση focus fixes
-    initializeFocusFixes();
-    
-    // ==================== DOCUMENTATION FUNCTIONS ====================
-    
-    // Simple markdown to HTML converter
-    function convertMarkdownToHtml(markdown) {
-        let html = markdown;
-        
-        // Escape HTML entities first
-        html = html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        
-        // Headers
-        html = html.replace(/^# (.*$)/gm, '<h1>$1</h1>');
-        html = html.replace(/^## (.*$)/gm, '<h2>$1</h2>');
-        html = html.replace(/^### (.*$)/gm, '<h3>$1</h3>');
-        html = html.replace(/^#### (.*$)/gm, '<h4>$1</h4>');
-        html = html.replace(/^##### (.*$)/gm, '<h5>$1</h5>');
-        html = html.replace(/^###### (.*$)/gm, '<h6>$1</h6>');
-        
-        // Bold and italic
-        html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-        html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
-        
-        // Links
-        html = html.replace(/\[([^\]]+)\]\(([^\)]+)\)/g, '<a href="$2" class="text-decoration-none" target="_blank">$1 <i class="bi bi-box-arrow-up-right"></i></a>');
-        
-        // Code blocks (multi-line)
-        html = html.replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre class="bg-light p-3 rounded"><code>$2</code></pre>');
-        html = html.replace(/```\n([\s\S]*?)```/g, '<pre class="bg-light p-3 rounded"><code>$1</code></pre>');
-        
-        // Inline code
-        html = html.replace(/`([^`]+)`/g, '<code class="bg-light px-1 rounded">$1</code>');
-        
-        // Blockquotes
-        html = html.replace(/^&gt; (.*)$/gm, '<blockquote class="blockquote ps-3 border-start border-3 border-primary">$1</blockquote>');
-        
-        // Lists - ordered and unordered
-        html = html.replace(/^\d+\. (.*)$/gm, '<li>$1</li>');
-        html = html.replace(/^- (.*)$/gm, '<li>$1</li>');
-        
-        // Wrap consecutive list items in ul/ol
-        html = html.replace(/(<li>.*?<\/li>\s*)+/g, function(match) {
-            return '<ul class="list-unstyled">' + match + '</ul>';
-        });
-        
-        // Tables (improved)
-        html = html.replace(/\|([^|]+)\|/g, function(match, content) {
-            return '<td class="border px-2 py-1">' + content.trim() + '</td>';
-        });
-        html = html.replace(/(<td.*?<\/td>)+/g, function(match) {
-            return '<tr>' + match + '</tr>';
-        });
-        html = html.replace(/(<tr>.*?<\/tr>)+/g, function(match) {
-            return '<table class="table table-bordered table-sm">' + match + '</table>';
-        });
-        
-        // Horizontal rules
-        html = html.replace(/^---$/gm, '<hr class="my-4">');
-        
-        // Emojis and special characters
-        html = html.replace(/:\w+:/g, function(match) {
-            const emojiMap = {
-                ':checkmark:': '✅',
-                ':x:': '❌',
-                ':warning:': '⚠️',
-                ':info:': 'ℹ️',
-                ':bulb:': '💡',
-                ':rocket:': '🚀',
-                ':gear:': '⚙️',
-                ':book:': '📚',
-                ':computer:': '💻',
-                ':mobile:': '📱'
-            };
-            return emojiMap[match] || match;
-        });
-        
-        // Break lines into paragraphs
-        html = html.replace(/\n\n+/g, '</p><p>');
-        html = html.replace(/\n/g, '<br>');
-        
-        // Wrap in paragraph tags
-        html = '<p>' + html + '</p>';
-        
-        // Clean up empty paragraphs and fix structure
-        html = html.replace(/<p><\/p>/g, '');
-        html = html.replace(/<p><br><\/p>/g, '');
-        html = html.replace(/<p>(<h[1-6]>.*?<\/h[1-6]>)<\/p>/g, '$1');
-        html = html.replace(/<p>(<ul>.*?<\/ul>)<\/p>/g, '$1');
-        html = html.replace(/<p>(<ol>.*?<\/ol>)<\/p>/g, '$1');
-        html = html.replace(/<p>(<table>.*?<\/table>)<\/p>/g, '$1');
-        html = html.replace(/<p>(<pre>.*?<\/pre>)<\/p>/g, '$1');
-        html = html.replace(/<p>(<blockquote>.*?<\/blockquote>)<\/p>/g, '$1');
-        html = html.replace(/<p>(<hr[^>]*>)<\/p>/g, '$1');
-        
-        // Add Bootstrap classes for better styling
-        html = html.replace(/<table>/g, '<table class="table table-striped table-hover">');
-        html = html.replace(/<blockquote>/g, '<blockquote class="blockquote border-start border-3 border-primary ps-3 my-3">');
-        html = html.replace(/<code>/g, '<code class="text-primary bg-light px-1 rounded">');
-        
-        return html;
-    }
-    
-    // Load and display documentation
-    async function loadDocumentation(filename, targetElementId) {
-        const targetElement = document.getElementById(targetElementId);
-        
-        if (!targetElement) {
-            console.error(`Target element ${targetElementId} not found`);
-            return;
-        }
-        
-        try {
-            // Show loading
-            targetElement.innerHTML = `
-                <div class="text-center">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Φόρτωση...</span>
-                    </div>
-                    <p class="mt-2">Φόρτωση ${filename}...</p>
-                </div>
-            `;
-            
-            // Read the file
-            const result = await window.electronAPI.readDocumentation(filename);
-            
-            if (result.success) {
-                // Convert markdown to HTML
-                const htmlContent = convertMarkdownToHtml(result.content);
-                targetElement.innerHTML = htmlContent;
-                
-                // Add smooth fade-in animation
-                targetElement.style.opacity = '0';
-                setTimeout(() => {
-                    targetElement.style.transition = 'opacity 0.5s ease-in-out';
-                    targetElement.style.opacity = '1';
-                }, 100);
-            } else {
-                targetElement.innerHTML = `
-                    <div class="alert alert-danger">
-                        <h6><i class="bi bi-exclamation-triangle me-2"></i>Σφάλμα Φόρτωσης</h6>
-                        <p>Δεν ήταν δυνατή η φόρτωση του αρχείου <strong>${filename}</strong>.</p>
-                        <p class="mb-0"><small>Σφάλμα: ${result.error}</small></p>
-                    </div>
-                `;
-            }
-        } catch (error) {
-            console.error('Error loading documentation:', error);
-            targetElement.innerHTML = `
-                <div class="alert alert-danger">
-                    <h6><i class="bi bi-exclamation-triangle me-2"></i>Σφάλμα Σύνδεσης</h6>
-                    <p>Δεν ήταν δυνατή η φόρτωση της τεκμηρίωσης.</p>
-                    <p class="mb-0"><small>Σφάλμα: ${error.message}</small></p>
-                </div>
-            `;
-        }
-    }
-    
-    // Show documentation modal
-    function showDocumentationModal() {
-        // Load default documentation (beginner guide)
-        loadDocumentation('BEGINNER-GUIDE.md', 'beginner-guide-html');
-        
-        // Set up tab change event listeners
-        const tabs = document.querySelectorAll('#documentation-tabs button');
-        tabs.forEach(tab => {
-            tab.addEventListener('click', function() {
-                const targetId = this.getAttribute('data-bs-target').replace('#', '');
-                const contentId = targetId.replace('-content', '-html');
-                
-                // Map tab to filename
-                const fileMap = {
-                    'beginner-guide-html': 'BEGINNER-GUIDE.md',
-                    'auto-backup-html': 'AUTO_BACKUP_INFO.md',
-                    'focus-fix-html': 'FOCUS_FIX_GUIDE.md',
-                    'release-notes-html': 'RELEASE-NOTES.md',
-                    'license-html': 'LICENSE'
-                };
-                
-                const filename = fileMap[contentId];
-                if (filename) {
-                    loadDocumentation(filename, contentId);
-                }
-            });
-        });
-        
-        documentationModal.show();
-    }
-    
-    // Open documentation in separate window
-    function openDocumentationWindow(filename) {
-        // Map filename to title
-        const titleMap = {
-            'BEGINNER-GUIDE.md': 'Οδηγός για Αρχάριους',
-            'AUTO_BACKUP_INFO.md': 'Auto Backup System',
-            'FOCUS_FIX_GUIDE.md': 'Focus Fix Guide',
-            'RELEASE-NOTES.md': 'Release Notes',
-            'LICENSE': 'License'
-        };
-        
-        const title = titleMap[filename] || 'Τεκμηρίωση';
-        
-        // Set modal title
-        document.getElementById('doc-window-title').innerHTML = `<i class="bi bi-book me-2"></i>${title}`;
-        
-        // Load content
-        loadDocumentation(filename, 'doc-window-content');
-        
-        // Show modal
-        documentationWindowModal.show();
-    }
-    
-    // Make function available globally
-    window.openDocumentationWindow = openDocumentationWindow;
-});
