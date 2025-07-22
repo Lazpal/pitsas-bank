@@ -301,6 +301,40 @@ ipcMain.handle('restore-focus', async () => {
   }
 });
 
+// IPC Handler για άνοιγμα αρχείων
+ipcMain.handle('open-file', async (event, filename) => {
+  try {
+    const { shell } = require('electron');
+    let filePath;
+    
+    // Special handling for contact.html - open in browser
+    if (filename === 'contact.html') {
+      filePath = path.join(__dirname, filename);
+      await shell.openExternal(`file://${filePath}`);
+      return { success: true, message: 'Η σελίδα επικοινωνίας άνοιξε στον browser' };
+    }
+    
+    // For other files, use default system application
+    filePath = path.join(__dirname, filename);
+    
+    // Check if file exists
+    if (!fs.existsSync(filePath)) {
+      return { success: false, error: `Το αρχείο ${filename} δεν βρέθηκε` };
+    }
+    
+    await shell.openPath(filePath);
+    
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`Successfully opened file: ${filename}`);
+    }
+    
+    return { success: true, message: `Το αρχείο ${filename} άνοιξε επιτυχώς` };
+  } catch (error) {
+    console.error('Error opening file:', error);
+    return { success: false, error: error.message };
+  }
+});
+
 // IPC Handler για διάβασμα .md αρχείων
 ipcMain.handle('read-documentation', async (event, filename) => {
   try {
