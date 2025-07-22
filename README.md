@@ -1,5 +1,6 @@
 # 🏦 Pitsas Camp Bank
 
+[![GitHub Pages dependencies preinstalled (status)](https://github.com/Lazpal/pitsas-bank/actions/workflows/jekyll-gh-pages.yml/badge.svg)](https://github.com/Lazpal/pitsas-bank/actions/workflows/jekyll-gh-pages.yml)
 https://lazpal.github.io/pitsas-bank/app/index.html
 
 > Σύστημα διαχείρισης χρημάτων για κατασκηνώσεις - Ψηφιακή τράπεζα κατασκηνωτών
