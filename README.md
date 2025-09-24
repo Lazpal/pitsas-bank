@@ -1,8 +1,11 @@
 # 🏦 Pitsas Camp Bank
 
 [![GitHub Pages dependencies preinstalled (status)](https://github.com/Lazpal/pitsas-bank/actions/workflows/jekyll-gh-pages.yml/badge.svg)](https://github.com/Lazpal/pitsas-bank/actions/workflows/jekyll-gh-pages.yml)
+-
 https://lazpal.github.io/pitsas-bank/app/index.html
-
+-
+**[Επικοινωνία](contact.html)**
+-
 > Σύστημα διαχείρισης χρημάτων για κατασκηνώσεις - Ψηφιακή τράπεζα κατασκηνωτών
 1
 ![License](https://img.shields.io/badge/License-Custom-blue.svg)
@@ -24,6 +27,43 @@ https://lazpal.github.io/pitsas-bank/app/index.html
 - 📱 Responsive design για όλες τις συσκευές
 - 🔄 Αυτόματο backup σύστημα
 - 🎯 Enhanced focus management
+
+## sreecesots
+
+<table align="center">
+  <tr>
+    <td align="center">
+      <img width="100%" src="https://github.com/Lazpal/pitsas-bank/blob/main/sreceensots/bank-index.png" />
+    </td>
+    <td align="center">
+      <img width="100%" src="https://github.com/Lazpal/pitsas-bank/blob/main/sreceensots/bank-index2.png" />
+    </td>
+  </tr>
+    <tr>
+    <td align="center">
+      <img width="100%" src="https://github.com/Lazpal/pitsas-bank/blob/main/sreceensots/bank-index3.png" />
+    </td>
+    <td align="center">
+      <img width="100%" src="https://github.com/Lazpal/pitsas-bank/blob/main/sreceensots/bank-index4.png" />
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img width="100%" src="https://github.com/Lazpal/pitsas-bank/blob/main/sreceensots/bank-setings.png" />
+    </td>
+    <td align="center">
+      <img width="100%" src="https://github.com/Lazpal/pitsas-bank/blob/main/sreceensots/Απόδειξη Συναλλαγής.png" />
+    </td>
+  </tr>
+   <tr>
+    <td align="center">
+      <img width="100%" src="https://github.com/Lazpal/pitsas-bank/blob/main/sreceensots/Προσθήκη Νέου Παιδιού.png" />
+    </td>
+    <td align="center">
+      <img width="100%" src="https://github.com/Lazpal/pitsas-bank/blob/main/sreceensots/login.png" />
+    </td>
+  </tr>
+</table>
 
 ## 📚 Τεκμηρίωση
 
@@ -413,3 +453,4 @@ npm run build
   <p>🏦 <strong>Pitsas Camp Bank © 2025</strong></p>
   <p>📋 <strong>Production Ready - Version 1.0.0</strong></p>
 </div>
+
