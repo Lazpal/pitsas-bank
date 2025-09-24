@@ -60,7 +60,7 @@ https://lazpal.github.io/pitsas-bank/app/index.html
       <img width="100%" src="https://github.com/Lazpal/pitsas-bank/blob/main/sreceensots/Προσθήκη Νέου Παιδιού.png" />
     </td>
     <td align="center">
-      <img width="100%" src="https://github.com/Lazpal/pitsas-bank/blob/main/sreceensots/login.png" />
+      <img width="100%" src="https://github.com/Lazpal/pitsas-bank/blob/main/sreceensots/bank-login.png" />
     </td>
   </tr>
 </table>
@@ -453,4 +453,5 @@ npm run build
   <p>🏦 <strong>Pitsas Camp Bank © 2025</strong></p>
   <p>📋 <strong>Production Ready - Version 1.0.0</strong></p>
 </div>
+
 
