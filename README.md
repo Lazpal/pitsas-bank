@@ -1,6 +1,7 @@
 # 🏦 Pitsas Camp Bank
 
 [![GitHub Pages dependencies preinstalled (status)](https://github.com/Lazpal/pitsas-bank/actions/workflows/jekyll-gh-pages.yml/badge.svg)](https://github.com/Lazpal/pitsas-bank/actions/workflows/jekyll-gh-pages.yml)
+[![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/donate?hosted_button_id=BC8S3RFPLQTHN)
 -
 https://lazpal.github.io/pitsas-bank/app/index.html
 -
@@ -445,6 +446,12 @@ npm run build
 - 📚 **Documentation**: Ελέγξτε τα .md files για οδηγίες
 - 🔧 **Technical Support**: Περιλάβετε system info και logs
 
+## ☕ Support My Work
+- 🌐 PayPal Donate |
+ If you like what I do, consider donating:
+
+[![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/donate?hosted_button_id=BC8S3RFPLQTHN)
+
 ---
 
 <div align="center">
@@ -453,5 +460,6 @@ npm run build
   <p>🏦 <strong>Pitsas Camp Bank © 2025</strong></p>
   <p>📋 <strong>Production Ready - Version 1.0.0</strong></p>
 </div>
+
 
 
