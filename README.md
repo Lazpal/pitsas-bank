@@ -32,6 +32,7 @@ https://lazpal.github.io/pitsas-bank/app/index.html
 ## sreecesots
 
 <table align="center">
+        <img width="100%" src="https://github.com/Lazpal/pitsas-bank/blob/main/sreceensots/bank-index.png" />
   <tr>
     <td align="center">
       <img width="100%" src="https://github.com/Lazpal/pitsas-bank/blob/main/sreceensots/bank-index.png" />
@@ -460,6 +461,7 @@ npm run build
   <p>🏦 <strong>Pitsas Camp Bank © 2025</strong></p>
   <p>📋 <strong>Production Ready - Version 1.0.0</strong></p>
 </div>
+
 
 
 
