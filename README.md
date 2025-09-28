@@ -20,7 +20,7 @@ https://lazpal.github.io/pitsas-bank/app/index.html
 
 ## 📋 Περιγραφή
 
-Το **Pitsas Camp Bank** είναι ένα ολοκληρωμένο **Electron Desktop Application** για τη διαχείριση των χρημάτων των παιδιών σε κατασκηνώσεις. Παρέχει ένα ασφαλές και εύκολο στη χρήση σύστημα για:
+Το **Bank System by lazpal** είναι ένα ολοκληρωμένο **Electron Desktop Application** για τη διαχείριση των χρημάτων των παιδιών σε κατασκηνώσεις. Παρέχει ένα ασφαλές και εύκολο στη χρήση σύστημα για:
 
 - 💰 Διαχείριση υπολοίπων κατασκηνωτών
 - 📊 Παρακολούθηση συναλλαγών
@@ -464,6 +464,7 @@ npm run build
 </div>
 
 <a href="https://github.com/Lazpal/pitsas-bank"><img src="app/img/bank system baners/1.png"></a>
+
 
 
 
