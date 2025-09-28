@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pitsas Camp - Εικονική Τράπεζα</title>
+    <title>lazpal Bank - Εικονική Τράπεζα</title>
     <link rel="icon" type="image/png" href="img/favicon.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
@@ -15,8 +15,8 @@
     <div id="login-container" class="container-fluid vh-100 d-flex align-items-center justify-content-center">
         <div class="card shadow-lg p-4 col-md-4">
             <div class="text-center mb-4">
-                <img src="img/logo.png" alt="Pitsas Camp Logo" class="img-fluid camp-logo mb-3" style="max-height: 120px;">
-                <h2 class="text-primary">Εικονική Τράπεζα Pitsas Camp</h2>
+                <img src="img/logo.png" alt="lazpal Bank Logo" class="img-fluid camp-logo mb-3" style="max-height: 120px;">
+                <h2 class="text-primary">Εικονική Τράπεζα Bank System by lazpal</h2>
                 <p class="text-muted">Είσοδος Προσωπικού</p>
             </div>
             <form id="login-form">
@@ -128,6 +128,9 @@
                                 <li><a class="dropdown-item" href="#" id="nav-backup">
                                     <i class="bi bi-cloud-download me-2"></i>Αντίγραφο Ασφαλείας
                                 </a></li>
+                                <li><a class="dropdown-item text-danger fw-bold" href="#" id="nav-new-period">
+                                    <i class="bi bi-arrow-repeat me-2"></i>Νέα Περίοδος
+                                </a></li>
                                 <li><a class="dropdown-item" href="#" id="nav-reset-limits">
                                     <i class="bi bi-arrow-clockwise me-2"></i>Επαναφορά Ημερήσιων Ορίων
                                 </a></li>
@@ -148,6 +151,10 @@
                                 </a></li>
                                 <li><a class="dropdown-item" href="#" id="nav-shortcuts">
                                     <i class="bi bi-keyboard me-2"></i>Συντομεύσεις (F1)
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" id="nav-contact">
+                                    <i class="bi bi-envelope me-2"></i>Επικοινωνία
                                 </a></li>
                             </ul>
                         </li>
@@ -1254,6 +1261,38 @@
         </div>
     </div>
 
+    <!-- Contact Information Modal -->
+    <div class="modal fade" id="contactModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="bi bi-envelope me-2"></i>Επικοινωνία & Υποστήριξη</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="contact-content">
+                    <!-- Content will be loaded dynamically -->
+                    <div class="text-center py-3">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Φόρτωση...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Φόρτωση στοιχείων επικοινωνίας...</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i>Κλείσιμο
+                    </button>
+                    <button type="button" class="btn btn-success" id="open-contact-html">
+                        <i class="bi bi-browser-chrome me-1"></i>Άνοιγμα σε Browser
+                    </button>
+                    <button type="button" class="btn btn-primary" id="open-contact-file">
+                        <i class="bi bi-file-text me-1"></i>Άνοιγμα Markdown
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Documentation Modal -->
     <div class="modal fade" id="documentationModal" tabindex="-1">
         <div class="modal-dialog modal-xl">
@@ -1399,6 +1438,150 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                         <i class="bi bi-x-circle me-1"></i>Κλείσιμο
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- New Period Modal -->
+    <div class="modal fade" id="newPeriodModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content border-danger">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        ΠΡΟΣΟΧΗ: Εκκίνηση Νέας Περιόδου
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger" role="alert">
+                        <h6 class="alert-heading">
+                            <i class="bi bi-shield-exclamation me-2"></i>
+                            ΚΡΊΣΙΜΗ ΕΝΈΡΓΕΙΑ - ΔΙΑΒΆΣΤΕ ΠΡΟΣΕΚΤΙΚΆ
+                        </h6>
+                        <p class="mb-0">
+                            Αυτή η ενέργεια θα <strong>διαγράψει ΌΛΑ τα δεδομένα</strong> από την εφαρμογή 
+                            και θα ξεκινήσει μια νέα περίοδο κατασκήνωσης.
+                        </p>
+                    </div>
+
+                    <div class="card mb-3">
+                        <div class="card-header bg-warning">
+                            <h6 class="mb-0">
+                                <i class="bi bi-info-circle me-2"></i>
+                                Τι θα συμβεί:
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="mb-0">
+                                <li class="text-danger"><strong>Διαγραφή ΌΛΩΝ των παιδιών</strong></li>
+                                <li class="text-danger"><strong>Διαγραφή ΌΛΩΝ των συναλλαγών</strong></li>
+                                <li class="text-danger"><strong>Διαγραφή ΌΛΩΝ των στατιστικών</strong></li>
+                                <li class="text-success">Δημιουργία αυτόματου backup προ διαγραφής</li>
+                                <li class="text-info">Επαναφορά ρυθμίσεων στις προεπιλογές</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="card mb-3">
+                        <div class="card-header bg-success text-white">
+                            <h6 class="mb-0">
+                                <i class="bi bi-shield-check me-2"></i>
+                                Μέτρα Ασφαλείας:
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="new-period-backup-confirm">
+                                <label class="form-check-label" for="new-period-backup-confirm">
+                                    <strong>Αυτόματο Backup:</strong> Θα δημιουργηθεί αυτόματα backup πριν τη διαγραφή
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="new-period-filename-confirm">
+                                <label class="form-check-label" for="new-period-filename-confirm">
+                                    <strong>Όνομα Backup:</strong> <code id="backup-filename">pitsas_period_backup_[ΗΜΕΡΟΜΗΝΙΑ].json</code>
+                                </label>
+                            </div>
+                            <div class="alert alert-info mt-2 mb-0">
+                                <small>
+                                    <i class="bi bi-lightbulb me-1"></i>
+                                    <strong>Συμβουλή:</strong> Κρατήστε το backup σε ασφαλές μέρος για μελλοντική αναφορά!
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mb-3">
+                        <div class="card-header bg-primary text-white">
+                            <h6 class="mb-0">
+                                <i class="bi bi-calendar-check me-2"></i>
+                                Στατιστικά Τρέχουσας Περιόδου:
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row" id="current-period-stats">
+                                <div class="col-md-3 text-center">
+                                    <div class="fs-4 text-primary" id="stats-children-count">0</div>
+                                    <small class="text-muted">Παιδιά</small>
+                                </div>
+                                <div class="col-md-3 text-center">
+                                    <div class="fs-4 text-success" id="stats-total-balance">0€</div>
+                                    <small class="text-muted">Συνολικό Υπόλοιπο</small>
+                                </div>
+                                <div class="col-md-3 text-center">
+                                    <div class="fs-4 text-info" id="stats-transactions-count">0</div>
+                                    <small class="text-muted">Συναλλαγές</small>
+                                </div>
+                                <div class="col-md-3 text-center">
+                                    <div class="fs-4 text-warning" id="stats-days-active">0</div>
+                                    <small class="text-muted">Ημέρες Δραστηριότητας</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Επιβεβαίωση -->
+                    <div class="card border-danger">
+                        <div class="card-header bg-danger text-white">
+                            <h6 class="mb-0">
+                                <i class="bi bi-hand-thumbs-down me-2"></i>
+                                Τελική Επιβεβαίωση
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="new-period-understand">
+                                <label class="form-check-label" for="new-period-understand">
+                                    <strong>Κατανοώ</strong> ότι αυτή η ενέργεια θα διαγράψει ΌΛΑ τα δεδομένα
+                                </label>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="new-period-backup-saved">
+                                <label class="form-check-label" for="new-period-backup-saved">
+                                    <strong>Επιβεβαιώνω</strong> ότι έχω αποθηκεύσει/θα αποθηκεύσω το backup
+                                </label>
+                            </div>
+                            <div class="mb-3">
+                                <label for="new-period-confirmation-text" class="form-label">
+                                    <strong>Πληκτρολογήστε:</strong> <code>ΝΕΑ ΠΕΡΙΟΔΟΣ</code>
+                                </label>
+                                <input type="text" class="form-control" id="new-period-confirmation-text" 
+                                       placeholder="Πληκτρολογήστε: ΝΕΑ ΠΕΡΙΟΔΟΣ">
+                                <small class="form-text text-muted">
+                                    Αυτό εξασφαλίζει ότι γνωρίζετε τι κάνετε
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-2"></i>Ακύρωση
+                    </button>
+                    <button type="button" class="btn btn-danger" id="confirm-new-period" disabled>
+                        <i class="bi bi-arrow-repeat me-2"></i>ΕΚΚΊΝΗΣΗ ΝΈΑΣ ΠΕΡΙΌΔΟΥ
                     </button>
                 </div>
             </div>

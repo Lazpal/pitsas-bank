@@ -1,0 +1,27 @@
+{
+    "meta": {
+        "lastUpdated": "2025-07-23 15:14:11",
+        "generatedBy": "Lazpal",
+        "version": "1.2.1"
+    },
+    "settings": {
+        "defaultLicense": "SPD-MDFXQ6KB-MXOK9R"
+    },
+    "licenses": {
+        "SPD-MDFXQ6KB-MXOK9R": {
+            "valid": true,
+            "cancelled": false,
+            "active": true,
+            "data": {
+                "licenseKey": "SPD-MBANKL24-U39HPG",
+                "project": "pitsas bank",
+                "client": "pitsas camp",
+                "company": "ΠΙΤΣΑΣ ΚΑΜΠ Ε.Π.Ε",
+                "support": "basic",
+                "created": "2025-01-15T10:30:00Z",
+                "days": 0
+            },
+            "timestamp": "2025-07-23T15:14:11Z"
+        }
+    }
+}

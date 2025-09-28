@@ -9,7 +9,8 @@ const validChannels = [
   'restore-focus',
   'app-ready',
   'app-closing',
-  'read-documentation'
+  'read-documentation',
+  'open-file'
 ];
 
 // Validate channel
@@ -73,6 +74,17 @@ contextBridge.exposeInMainWorld('electronAPI', {
       return await ipcRenderer.invoke('read-documentation', filename);
     } catch (error) {
       console.error('Read documentation error:', error);
+      return { success: false, error: error.message };
+    }
+  },
+  
+  // File opening API
+  openFile: async (filename) => {
+    try {
+      if (!filename) throw new Error('No filename provided');
+      return await ipcRenderer.invoke('open-file', filename);
+    } catch (error) {
+      console.error('Open file error:', error);
       return { success: false, error: error.message };
     }
   },

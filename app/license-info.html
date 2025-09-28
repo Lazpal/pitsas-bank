@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>License Information</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="contact.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="img/favicon.png"/>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f7fa;
+            padding: 20px;
+        }
+
+        .license-widget {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e0e4e7;
+        }
+
+        .license-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e0e4e7;
+        }
+
+        .license-header h2 {
+            color: #667eea;
+            margin-bottom: 0.5rem;
+            font-size: 1.5rem;
+        }
+
+        .license-header p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .loading {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 2rem;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e0e4e7;
+            border-radius: 50%;
+            border-top-color: #667eea;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Valid License Styles */
+        .license-valid {
+            background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%);
+            border: 2px solid #28a745;
+            border-radius: 10px;
+            padding: 1.5rem;
+        }
+
+        .license-valid .status-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #155724;
+        }
+
+        /* Cancelled License Styles */
+        .license-cancelled {
+            background: linear-gradient(135deg, #fff8e1 0%, #fff3cd 100%);
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 1.5rem;
+        }
+
+        .license-cancelled .status-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #856404;
+        }
+
+        /* Invalid License Styles */
+        .license-invalid {
+            background: linear-gradient(135deg, #ffeaea 0%, #f8d7da 100%);
+            border: 2px solid #dc3545;
+            border-radius: 10px;
+            padding: 1.5rem;
+        }
+
+        .license-invalid .status-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #721c24;
+        }
+
+        /* License Details */
+        .license-details {
+            margin-bottom: 1rem;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        .detail-value {
+            color: #555;
+            font-size: 0.9rem;
+            text-align: right;
+            word-break: break-word;
+            max-width: 60%;
+        }
+
+        .license-key-display {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            word-break: break-all;
+            margin: 1rem 0;
+            border: 1px dashed #667eea;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .license-key-display:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: #28a745;
+            color: white;
+        }
+
+        .status-inactive {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .status-cancelled {
+            background: #dc3545;
+            color: white;
+        }
+
+        .support-badge {
+            padding: 0.2rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        .support-basic {
+            background: #28a745;
+            color: white;
+        }
+
+        .support-premium {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .support-expired {
+            background: #dc3545;
+            color: white;
+        }
+
+        .support-none {
+            background: #6c757d;
+            color: white;
+        }
+
+        /* Footer */
+        .license-footer {
+            text-align: center;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        /* Error States */
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #f5c6cb;
+            text-align: center;
+        }
+
+        .offline-message {
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #bee5eb;
+            text-align: center;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .license-widget {
+                padding: 1rem;
+            }
+
+            .detail-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.25rem;
+            }
+
+            .detail-value {
+                max-width: 100%;
+                text-align: left;
+            }
+
+            .status-header {
+                font-size: 1rem !important;
+                flex-direction: column;
+                text-align: center;
+                gap: 0.25rem !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-primary" href="index.html">
+                <i class="bi bi-bank2 me-2"></i>Pitsas Camp Bank
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">app</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="contact.html">Επικοινωνία</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="contact.html#about">Περί του Project</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="contact.html#support">Υποστήριξη</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="contact.html#stats">Στατιστικά</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="license-info.html">Ο Λογαριασμός μου (license key)</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <br><hr>
+    <div class="license-widget">
+        <div class="license-header">
+            <h2>🔐 Software License</h2>
+            <p>License information για αυτό το λογισμικό</p>
+        </div>
+        
+        <div id="licenseContent">
+            <div class="loading">
+                <span class="loading-spinner"></span>
+                Φόρτωση πληροφοριών license...
+            </div>
+        </div>
+    </div>
+    <br>
+
+ <script>
+        /**
+         * License Checker για Στατικά Δεδομένα
+         * Έκδοση: 1.2.1
+         * Δημιουργήθηκε: 2025-07-23 15:14:11
+         * Δημιουργός: Lazpal
+         */
+        
+        class LicenseChecker {
+            constructor() {
+                this.licenseKey = null;
+                this.licenseData = null;
+            }
+            
+            // Φόρτωση δεδομένων από JSON αρχείο
+            async loadLicenseData() {
+                try {
+                    console.log('📂 Loading license data from JSON file...');
+                    const response = await fetch('license-data.json');
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    console.log('✅ License data loaded successfully');
+                    
+                    // Θέτουμε το license key από το αρχείο
+                    this.licenseKey = data.settings.defaultLicense;
+                    console.log('🔑 Using license key:', this.licenseKey);
+                    
+                    return data;
+                } catch (error) {
+                    console.error('❌ Error loading license data:', error.message);
+                    return {
+                        meta: {
+                            error: true,
+                            message: error.message
+                        },
+                        licenses: {}
+                    };
+                }
+            }
+            
+            // Έλεγχος εγκυρότητας άδειας
+            async verify() {
+                console.log('🔍 Starting license verification...');
+                
+                try {
+                    const licenseData = await this.loadLicenseData();
+                    this.licenseData = licenseData;
+                    
+                    if (licenseData.meta.error) {
+                        throw new Error('Failed to load license data');
+                    }
+                    
+                    if (!this.licenseKey) {
+                        throw new Error('No license key specified');
+                    }
+                    
+                    // Αναζήτηση στα δεδομένα αδειών
+                    if (licenseData.licenses[this.licenseKey]) {
+                        console.log('✅ License found in data');
+                        return licenseData.licenses[this.licenseKey];
+                    } else {
+                        console.error('❌ License not found in data');
+                        return {
+                            valid: false,
+                            cancelled: false,
+                            error: "NOT_FOUND",
+                            timestamp: new Date().toISOString()
+                        };
+                    }
+                } catch (error) {
+                    console.error('❌ License verification failed:', error.message);
+                    return {
+                        valid: false,
+                        offline: true,
+                        error: 'DATA_ERROR',
+                        details: error.message
+                    };
+                }
+            }
+            
+            // Εμφάνιση πληροφοριών άδειας
+            async displayInfo() {
+                const contentDiv = document.getElementById('licenseContent');
+                
+                // Εμφάνιση μηνύματος φόρτωσης
+                contentDiv.innerHTML = `
+                    <div class="loading-message">
+                        <div class="loading-spinner"></div>
+                        <p>Φόρτωση πληροφοριών άδειας...</p>
+                    </div>
+                `;
+                
+                const result = await this.verify();
+                
+                if (result.valid && !result.cancelled) {
+                    // Valid License
+                    const statusClass = result.active ? 'status-active' : 'status-inactive';
+                    const statusText = result.active ? '🟢 Ενεργό' : '🟡 Ανενεργό';
+                    const supportClass = this.getSupportClass(result.data.support);
+                    const supportText = this.getSupportText(result.data.support);
+                    
+                    contentDiv.innerHTML = `
+                        <div class="license-valid">
+                            <div class="status-header">
+                                <span>✅</span>
+                                <span>Έγκυρο License</span>
+                            </div>
+                            
+                            <div class="license-details">
+                                <div class="detail-row">
+                                    <span class="detail-label">📋 Project:</span>
+                                    <span class="detail-value">${this.escapeHtml(result.data.project)}</span>
+                                </div>
+                                
+                                <div class="detail-row">
+                                    <span class="detail-label">👤 Licensed to:</span>
+                                    <span class="detail-value">${this.escapeHtml(result.data.client)}</span>
+                                </div>
+                                
+                                ${result.data.company ? `
+                                <div class="detail-row">
+                                    <span class="detail-label">🏢 Company:</span>
+                                    <span class="detail-value">${this.escapeHtml(result.data.company)}</span>
+                                </div>
+                                ` : ''}
+                                
+                                <div class="detail-row">
+                                    <span class="detail-label">📊 Status:</span>
+                                    <span class="detail-value">
+                                        <span class="status-badge ${statusClass}">${statusText}</span>
+                                    </span>
+                                </div>
+                                
+                                <div class="detail-row">
+                                    <span class="detail-label">🛠️ Support:</span>
+                                    <span class="detail-value">
+                                        <span class="support-badge ${supportClass}">${supportText}</span>
+                                    </span>
+                                </div>
+                                
+                                <div class="detail-row">
+                                    <span class="detail-label">📅 Purchase Date:</span>
+                                    <span class="detail-value">${this.formatDate(result.data.created)}</span>
+                                </div>
+                                
+                                <div class="detail-row">
+                                    <span class="detail-label">⏱️ Days Active:</span>
+                                    <span class="detail-value">${result.data.days} ημέρες</span>
+                                </div>
+                            </div>
+                            
+                            <details style="margin-top: 1rem;">
+                                <summary style="cursor: pointer; color: #667eea; font-size: 0.9rem;">🔑 License Key</summary>
+                                <div class="license-key-display" onclick="copyToClipboard('${result.data.licenseKey}')" title="Κλικ για αντιγραφή">
+                                    ${result.data.licenseKey}
+                                </div>
+                            </details>
+                            
+                            <div class="license-footer">
+                                ✓ Verified at ${this.formatDateTime(result.timestamp)}
+                            </div>
+                        </div>
+                    `;
+                    
+                } else if (result.cancelled) {
+                    // Cancelled License
+                    contentDiv.innerHTML = `
+                        <div class="license-cancelled">
+                            <div class="status-header">
+                                <span>⚠️</span>
+                                <span>License Ακυρώθηκε</span>
+                            </div>
+                            
+                            <div class="license-details">
+                                <div class="detail-row">
+                                    <span class="detail-label">📋 Project:</span>
+                                    <span class="detail-value">${this.escapeHtml(result.data?.projectName || 'N/A')}</span>
+                                </div>
+                                
+                                <div class="detail-row">
+                                    <span class="detail-label">👤 Licensed to:</span>
+                                    <span class="detail-value">${this.escapeHtml(result.data?.clientName || 'N/A')}</span>
+                                </div>
+                                
+                                <div class="detail-row">
+                                    <span class="detail-label">📊 Status:</span>
+                                    <span class="detail-value">
+                                        <span class="status-badge status-cancelled">🚫 Cancelled</span>
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="license-footer">
+                                ⚠️ Επικοινωνήστε με υποστήριξη για περισσότερες πληροφορίες
+                            </div>
+                        </div>
+                    `;
+                    
+                } else if (result.offline) {
+                    // Offline/Connection Error
+                    contentDiv.innerHTML = `
+                        <div class="offline-message">
+                            <h3>🔌 Data Error</h3>
+                            <p>Δεν ήταν δυνατή η φόρτωση των δεδομένων άδειας.</p>
+                            <p><small>Error: ${result.details || 'Unknown error'}</small></p>
+                        </div>
+                    `;
+                    
+                } else {
+                    // Invalid License
+                    let errorMessage = 'License key is not valid';
+                    if (result.error === 'NOT_FOUND') {
+                        errorMessage = 'License key not found in database';
+                    }
+                    
+                    contentDiv.innerHTML = `
+                        <div class="license-invalid">
+                            <div class="status-header">
+                                <span>❌</span>
+                                <span>Invalid License</span>
+                            </div>
+                            
+                            <div class="license-details">
+                                <div class="detail-row">
+                                    <span class="detail-label">License Key:</span>
+                                    <span class="detail-value">${this.licenseKey}</span>
+                                </div>
+                                
+                                <div class="detail-row">
+                                    <span class="detail-label">Error:</span>
+                                    <span class="detail-value">${result.error}</span>
+                                </div>
+                                
+                                <div class="detail-row">
+                                    <span class="detail-label">Description:</span>
+                                    <span class="detail-value">${errorMessage}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="license-footer">
+                                📞 Επικοινωνήστε με υποστήριξη για βοήθεια
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            
+            // Βοηθητικές μέθοδοι
+            getSupportClass(support) {
+                const classMap = {
+                    'basic': 'support-basic',
+                    'premium': 'support-premium',
+                    'expired': 'support-expired',
+                    'none': 'support-none'
+                };
+                return classMap[support] || 'support-none';
+            }
+            
+            getSupportText(support) {
+                const textMap = {
+                    'basic': 'Basic',
+                    'premium': 'Premium',
+                    'expired': 'Expired',
+                    'none': 'None'
+                };
+                return textMap[support] || 'None';
+            }
+            
+            formatDate(dateString) {
+                return new Date(dateString).toLocaleDateString('el-GR');
+            }
+            
+            formatDateTime(dateString) {
+                return new Date(dateString).toLocaleString('el-GR');
+            }
+            
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+        }
+
+        // Copy to clipboard function
+        function copyToClipboard(text) {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('License key copied to clipboard!');
+                });
+            } else {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('License key copied to clipboard!');
+            }
+        }
+
+        // Initialize license checker when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const licenseChecker = new LicenseChecker();
+            licenseChecker.displayInfo();
+        });
+
+        // Make function globally available
+        window.copyToClipboard = copyToClipboard;
+    </script>
+
+    <!-- Security Notice Section -->
+    <div class="container mt-5">
+        <div class="alert alert-warning border-warning" style="border-left: 5px solid #ffc107; background: linear-gradient(135deg, #fff8e1 0%, #fff3cd 100%);">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <i class="bi bi-shield-exclamation" style="font-size: 2rem; color: #856404;"></i>
+                </div>
+                <div class="col">
+                    <h5 class="alert-heading mb-2" style="color: #856404;">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        Σημαντική Ειδοποίηση Ασφαλείας
+                    </h5>
+                    <p class="mb-2" style="color: #856404; font-weight: 500;">
+                        <strong>Αν αυτό το λογισμικό έχει πέσει στα χέρια σας και δεν είναι για εσάς ή σας πουλήθηκε παράνομα, παρακαλώ επικοινωνήστε μαζί μου άμεσα.</strong>
+                    </p>
+                    <hr style="border-color: #856404; opacity: 0.5;">
+                    <div class="row g-2 text-sm">
+                        <div class="col-md-6">
+                            <p class="mb-1" style="color: #856404;">
+                                <i class="bi bi-envelope me-2"></i>
+                                <strong>Email:</strong> 
+                                <a href="mailto:pallazarosb@gmail.com" style="color: #856404; text-decoration: underline;">pallazarosb@gmail.com</a>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1" style="color: #856404;">
+                                <i class="bi bi-telephone me-2"></i>
+                                <strong>Telegram:</strong> 
+                                <a href="https://t.me/LazarosPali" style="color: #856404; text-decoration: underline;">@LazarosPali</a>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <small style="color: #856404; opacity: 0.8;">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Αυτό το λογισμικό προστατεύεται από πνευματικά δικαιώματα και νόμους περί πιρατείας. 
+                            Η μη εξουσιοδοτημένη χρήση είναι παράνομη.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Legal Notice -->
+    <div class="container mt-3 mb-5">
+        <div class="card border-danger" style="border-left: 5px solid #dc3545 !important;">
+            <div class="card-body" style="background: linear-gradient(135deg, #ffeaea 0%, #f8d7da 100%);">
+                <div class="d-flex align-items-start">
+                    <i class="bi bi-exclamation-octagon text-danger me-3" style="font-size: 1.5rem; margin-top: 0.2rem;"></i>
+                    <div>
+                        <h6 class="card-title text-danger mb-2">
+                            <strong>Προειδοποίηση Πνευματικών Δικαιωμάτων</strong>
+                        </h6>
+                        <p class="card-text text-danger mb-2" style="font-size: 0.9rem;">
+                            Το <strong>Lazpal Bank</strong> είναι προστατευμένο λογισμικό. 
+                            Εάν δεν διαθέτετε έγκυρη άδεια χρήσης:
+                        </p>
+                        <ul class="text-danger mb-2" style="font-size: 0.85rem;">
+                            <li>Η χρήση του λογισμικού είναι παράνομη</li>
+                            <li>Μπορεί να αντιμετωπίσετε νομικές συνέπειες</li>
+                            <li>Δεν θα λάβετε υποστήριξη ή ενημερώσεις</li>
+                            <li>Το λογισμικό μπορεί να περιέχει περιορισμούς ή bugs</li>
+                            <li><strong>Το λογισμικό μπορεί να περιέχει ευπάθειες ασφαλείας και ιούς η κακόβουλο λογισμικό</strong></li>
+                            <li>Η χρήση του λογισμικού χωρίς άδεια είναι παράνομη και ανήθικη</li>
+                        </ul>
+                        <div class="mt-3">
+                            <a href="mailto:pallazarosb@gmail.com" class="btn btn-outline-danger btn-sm me-2">
+                                <i class="bi bi-envelope me-1"></i>
+                                Αναφορά Παράνομης Χρήσης
+                            </a>
+                            <a href="https://lazpal.github.io/-/" class="btn btn-success btn-sm">
+                                <i class="bi bi-cart me-1"></i>
+                                Αγορά Νόμιμης Άδειας
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer with Copyright -->
+    <footer class="bg-dark text-light py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-8">
+                    <p class="mb-1">
+                        <strong>&copy; 2025 Lazaros Paliamaxidis</strong> - Όλα τα δικαιώματα διατηρούνται
+                    </p>
+                    <p class="mb-0" style="font-size: 0.9rem; opacity: 0.8;">
+                        Ανεπτυγμένο από <strong>Lazpal</strong> | Version 1.0.0 | Licensed Software
+                    </p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <p class="mb-1" style="font-size: 0.9rem;">
+                        <i class="bi bi-shield-check me-1"></i>
+                        Προστατευμένο Λογισμικό
+                    </p>
+                    <p class="mb-0" style="font-size: 0.8rem; opacity: 0.7;">
+                        Build: 2025.07.23
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

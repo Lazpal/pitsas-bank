@@ -73,6 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const receiptModal = new bootstrap.Modal(document.getElementById('receiptModal'));
     const idCardModal = new bootstrap.Modal(document.getElementById('idCardModal'));
     const backupModal = new bootstrap.Modal(document.getElementById('backupModal'));
+    const newPeriodModal = new bootstrap.Modal(document.getElementById('newPeriodModal'));
     const limitOverrideModal = new bootstrap.Modal(document.getElementById('limitOverrideModal'));
     const quickSearchModal = new bootstrap.Modal(document.getElementById('quickSearchModal'));
     const bulkDepositModal = new bootstrap.Modal(document.getElementById('bulkDepositModal'));
@@ -82,6 +83,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const advancedSearchModal = new bootstrap.Modal(document.getElementById('advancedSearchModal'));
     const documentationModal = new bootstrap.Modal(document.getElementById('documentationModal'));
     const documentationWindowModal = new bootstrap.Modal(document.getElementById('documentationWindowModal'));
+    const contactModal = new bootstrap.Modal(document.getElementById('contactModal'));
     
     // Add event listener to clean up transaction modal classes when hidden
     document.getElementById('transactionModal').addEventListener('hidden.bs.modal', function () {
@@ -1890,6 +1892,172 @@ document.addEventListener('DOMContentLoaded', function() {
         reader.readAsText(file);
     }
     
+    // New Period Functions
+    function prepareNewPeriodModal() {
+        // Update backup filename
+        const date = new Date().toISOString().split('T')[0];
+        const time = new Date().toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit' });
+        const filename = `pitsas_period_backup_${date}_${time.replace(':', '-')}.json`;
+        document.getElementById('backup-filename').textContent = filename;
+        
+        // Update current period statistics
+        updateCurrentPeriodStats();
+        
+        // Reset form
+        document.getElementById('new-period-backup-confirm').checked = false;
+        document.getElementById('new-period-filename-confirm').checked = false;
+        document.getElementById('new-period-understand').checked = false;
+        document.getElementById('new-period-backup-saved').checked = false;
+        document.getElementById('new-period-confirmation-text').value = '';
+        
+        // Disable confirm button
+        document.getElementById('confirm-new-period').disabled = true;
+        
+        // Show modal
+        newPeriodModal.show();
+    }
+    
+    function updateCurrentPeriodStats() {
+        const children = safeGetFromStorage('pitsasChildren', []);
+        const transactions = safeGetFromStorage('pitsasTransactions', []);
+        const settings = safeGetFromStorage('pitsasSettings', {});
+        
+        // Calculate statistics
+        const totalBalance = children.reduce((sum, child) => sum + child.balance, 0);
+        
+        // Calculate days of activity
+        const firstTransaction = transactions.length > 0 ? 
+            new Date(Math.min(...transactions.map(t => new Date(t.date)))) : 
+            new Date();
+        const daysActive = Math.ceil((new Date() - firstTransaction) / (1000 * 60 * 60 * 24));
+        
+        // Update UI
+        document.getElementById('stats-children-count').textContent = children.length;
+        document.getElementById('stats-total-balance').textContent = totalBalance.toFixed(2) + '€';
+        document.getElementById('stats-transactions-count').textContent = transactions.length;
+        document.getElementById('stats-days-active').textContent = Math.max(0, daysActive);
+    }
+    
+    function createPeriodBackup() {
+        return new Promise((resolve, reject) => {
+            try {
+                const backup = {
+                    children: safeGetFromStorage('pitsasChildren', []),
+                    transactions: safeGetFromStorage('pitsasTransactions', []),
+                    settings: safeGetFromStorage('pitsasSettings', {}),
+                    timestamp: new Date().toISOString(),
+                    periodEnd: true,
+                    metadata: {
+                        totalChildren: safeGetFromStorage('pitsasChildren', []).length,
+                        totalTransactions: safeGetFromStorage('pitsasTransactions', []).length,
+                        totalBalance: safeGetFromStorage('pitsasChildren', []).reduce((sum, child) => sum + child.balance, 0),
+                        periodStart: safeGetFromStorage('pitsasSettings', {}).periodStart || 'Unknown',
+                        periodEnd: new Date().toISOString()
+                    }
+                };
+                
+                const backupString = JSON.stringify(backup, null, 2);
+                const blob = new Blob([backupString], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                const date = new Date().toISOString().split('T')[0];
+                const time = new Date().toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit' });
+                const filename = `pitsas_period_backup_${date}_${time.replace(':', '-')}.json`;
+                
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                URL.revokeObjectURL(url);
+                resolve(filename);
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+    
+    function resetForNewPeriod() {
+        return new Promise((resolve, reject) => {
+            try {
+                // Clear all data
+                localStorage.removeItem('pitsasChildren');
+                localStorage.removeItem('pitsasTransactions');
+                
+                // Reset settings but keep some preferences
+                const currentSettings = safeGetFromStorage('pitsasSettings', {});
+                const newSettings = {
+                    darkMode: currentSettings.darkMode || false,
+                    soundNotifications: currentSettings.soundNotifications !== false,
+                    itemsPerPage: currentSettings.itemsPerPage || 10,
+                    autoBackup: currentSettings.autoBackup !== false,
+                    keyboardShortcuts: currentSettings.keyboardShortcuts !== false,
+                    smartAlerts: currentSettings.smartAlerts !== false,
+                    periodStart: new Date().toISOString(),
+                    lastBackup: new Date().toISOString()
+                };
+                
+                safeSetToStorage('pitsasSettings', newSettings);
+                
+                resolve();
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+    
+    async function executeNewPeriod() {
+        const confirmButton = document.getElementById('confirm-new-period');
+        const originalText = confirmButton.innerHTML;
+        
+        try {
+            // Disable button and show progress
+            confirmButton.disabled = true;
+            confirmButton.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Δημιουργία Backup...';
+            
+            // Create backup
+            const backupFilename = await createPeriodBackup();
+            showNotification(`Backup δημιουργήθηκε: ${backupFilename}`, 'success');
+            
+            // Update progress
+            confirmButton.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Καθαρισμός Δεδομένων...';
+            
+            // Small delay for UX
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Reset data
+            await resetForNewPeriod();
+            
+            // Update progress
+            confirmButton.innerHTML = '<i class="bi bi-check-circle me-2"></i>Ολοκληρώθηκε!';
+            
+            showNotification('Η νέα περίοδος ξεκίνησε επιτυχώς!', 'success');
+            
+            // Close modal
+            newPeriodModal.hide();
+            
+            // Refresh the entire interface
+            setTimeout(() => {
+                showNotification('Ανανέωση περιβάλλοντος...', 'info');
+                setTimeout(() => {
+                    loadDashboard();
+                    loadChildren();
+                    loadTransactions();
+                    loadStatistics();
+                    showNotification('Καλώς ήρθατε στη νέα περίοδο!', 'primary');
+                }, 1000);
+            }, 1500);
+            
+        } catch (error) {
+            console.error('Error during new period setup:', error);
+            showNotification('Σφάλμα κατά την εκκίνηση νέας περιόδου: ' + error.message, 'danger');
+            confirmButton.innerHTML = originalText;
+            confirmButton.disabled = false;
+        }
+    }
+    
     // Αυτόματο backup σύστημα
     function createAutoBackup() {
         try {
@@ -2380,6 +2548,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const homeLink = document.getElementById('home-brand');
     const navAddChild = document.getElementById('nav-add-child');
     const navBackup = document.getElementById('nav-backup');
+    const navNewPeriod = document.getElementById('nav-new-period');
     const navQuickSearch = document.getElementById('nav-quick-search');
     const navBulkDeposit = document.getElementById('nav-bulk-deposit');
     const navDailyReport = document.getElementById('nav-daily-report');
@@ -2411,6 +2580,13 @@ document.addEventListener('DOMContentLoaded', function() {
         navBackup.addEventListener('click', function(e) {
             e.preventDefault();
             backupModal.show();
+        });
+    }
+    
+    if (navNewPeriod) {
+        navNewPeriod.addEventListener('click', function(e) {
+            e.preventDefault();
+            prepareNewPeriodModal();
         });
     }
     
@@ -2485,6 +2661,15 @@ document.addEventListener('DOMContentLoaded', function() {
         navShortcuts.addEventListener('click', function(e) {
             e.preventDefault();
             keyboardShortcutsModal.show();
+        });
+    }
+    
+    // Contact Event Listener
+    const navContact = document.getElementById('nav-contact');
+    if (navContact) {
+        navContact.addEventListener('click', function(e) {
+            e.preventDefault();
+            showContactModal();
         });
     }
     
@@ -4087,6 +4272,223 @@ document.addEventListener('DOMContentLoaded', function() {
         // Show modal
         documentationWindowModal.show();
     }
+    
+    // ==================== CONTACT FUNCTIONS ====================
+    
+    // Show contact modal
+    function showContactModal() {
+        // Load contact information
+        loadContactInformation();
+        contactModal.show();
+    }
+    
+    // Load and display contact information
+    async function loadContactInformation() {
+        const contactContent = document.getElementById('contact-content');
+        
+        if (!contactContent) {
+            console.error('Contact content element not found!');
+            return;
+        }
+        
+        try {
+            const response = await fetch('../contact.html');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const htmlContent = await response.text();
+            
+            // Extract the body content from the HTML
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(htmlContent, 'text/html');
+            const bodyContent = doc.body.innerHTML;
+            
+            contactContent.innerHTML = bodyContent;
+            
+        } catch (error) {
+            console.error('Error loading contact information:', error);
+            contactContent.innerHTML = getFallbackContactContent();
+        }
+    }
+    
+    // Convert contact markdown to HTML with special styling
+    function convertContactMarkdownToHtml(markdown) {
+        let html = convertMarkdownToHtml(markdown); // Use existing function as base
+        
+        // Add special styling for contact info
+        html = html.replace(/📧 Email/g, '<i class="bi bi-envelope-fill text-primary me-2"></i><strong>Email</strong>');
+        html = html.replace(/💬 Telegram/g, '<i class="bi bi-telegram text-info me-2"></i><strong>Telegram</strong>');
+        html = html.replace(/🌐 Website/g, '<i class="bi bi-globe text-success me-2"></i><strong>Website</strong>');
+        
+        // Style email addresses
+        html = html.replace(/pallazarosb@gmail\.com/g, 
+            '<a href="mailto:pallazarosb@gmail.com" class="btn btn-outline-primary btn-sm">📧 pallazarosb@gmail.com</a>');
+        
+        // Style Telegram username
+        html = html.replace(/@LazarosPali/g, 
+            '<a href="https://t.me/LazarosPali" target="_blank" class="btn btn-outline-info btn-sm">💬 @LazarosPali</a>');
+        
+        // Style websites
+        html = html.replace(/https:\/\/lazpal\.github\.io\/-/g, 
+            '<a href="https://lazpal.github.io/-" target="_blank" class="btn btn-outline-success btn-sm">🌐 Portfolio</a>');
+        
+        html = html.replace(/https:\/\/github\.com\/Lazpal/g, 
+            '<a href="https://github.com/Lazpal" target="_blank" class="btn btn-outline-dark btn-sm">👨‍💻 GitHub</a>');
+        
+        html = html.replace(/https:\/\/www\.instagram\.com\/paliamaxidis_lazaros\//g, 
+            '<a href="https://www.instagram.com/paliamaxidis_lazaros/" target="_blank" class="btn btn-outline-danger btn-sm">� Instagram</a>');
+        
+        // Add cards for sections
+        html = html.replace(/<h2>([^<]+)<\/h2>/g, '<div class="card mt-3"><div class="card-header bg-primary text-white"><h5 class="mb-0">$1</h5></div><div class="card-body">');
+        html = html.replace(/<h3>([^<]+)<\/h3>/g, '</div></div><div class="card mt-2"><div class="card-header bg-secondary text-white"><h6 class="mb-0">$1</h6></div><div class="card-body">');
+        
+        // Close any open card at the end
+        html += '</div></div>';
+        
+        return html;
+    }
+    
+    // Fallback contact content if CONTACT.md fails to load
+    function getFallbackContactContent() {
+        return `
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-person-circle me-2"></i>Επικοινωνία</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-envelope-fill text-primary me-2"></i>Email</h6>
+                            <p><a href="mailto:pallazarosb@gmail.com" class="btn btn-outline-primary btn-sm">📧 pallazarosb@gmail.com</a></p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-telegram text-info me-2"></i>Telegram</h6>
+                            <p><a href="https://t.me/LazarosPali" target="_blank" class="btn btn-outline-info btn-sm">💬 @LazarosPali</a></p>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <h6><i class="bi bi-globe text-success me-2"></i>Websites</h6>
+                            <p>
+                                <a href="https://lazpal.github.io/-" target="_blank" class="btn btn-outline-success btn-sm me-2">🌐 Portfolio</a>
+                                <a href="https://github.com/Lazpal" target="_blank" class="btn btn-outline-dark btn-sm me-2">👨‍💻 GitHub</a>
+                                <a href="https://www.instagram.com/paliamaxidis_lazaros/" target="_blank" class="btn btn-outline-danger btn-sm">� Instagram</a>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="alert alert-info mt-3">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Υποστήριξη:</strong> Για τεχνική υποστήριξη του Pitsas Camp Bank, στείλτε email με θέμα "[Pitsas Camp Bank] - Περιγραφή προβλήματος"
+                    </div>
+                    <div class="alert alert-success">
+                        <i class="bi bi-clock me-2"></i>
+                        <strong>Ώρες διαθεσιμότητας:</strong> Δευτέρα-Παρασκευή 9:00-18:00, Σαββατοκύριακο 10:00-16:00 (Ώρα Ελλάδας)
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Open contact file button handler
+    const openContactFileBtn = document.getElementById('open-contact-file');
+    if (openContactFileBtn) {
+        openContactFileBtn.addEventListener('click', function() {
+            openContactFile();
+        });
+    }
+    
+    // Open contact HTML button handler
+    const openContactHtmlBtn = document.getElementById('open-contact-html');
+    if (openContactHtmlBtn) {
+        openContactHtmlBtn.addEventListener('click', function() {
+            openContactHtml();
+        });
+    }
+    
+    // Open contact file in external application
+    function openContactFile() {
+        if (window.electronAPI && window.electronAPI.openFile) {
+            window.electronAPI.openFile('contact.html').catch(error => {
+                console.error('Error opening contact file:', error);
+                showNotification('Δεν μπορώ να ανοίξω το αρχείο επικοινωνίας', 'error');
+            });
+        } else {
+            // Fallback - show notification
+            showNotification('Το αρχείο contact.html βρίσκεται στον κύριο φάκελο της εφαρμογής', 'info');
+        }
+    }
+    
+    // Open contact HTML page in browser
+    function openContactHtml() {
+        if (window.electronAPI && window.electronAPI.openFile) {
+            window.electronAPI.openFile('contact.html').then(result => {
+                if (result.success) {
+                    showNotification('Η σελίδα επικοινωνίας άνοιξε στον browser!', 'success');
+                    contactModal.hide(); // Close the modal
+                } else {
+                    showNotification('Δεν μπορώ να ανοίξω τη σελίδα επικοινωνίας', 'error');
+                }
+            }).catch(error => {
+                console.error('Error opening contact HTML:', error);
+                showNotification('Δεν μπορώ να ανοίξω τη σελίδα επικοινωνίας', 'error');
+            });
+        } else {
+            // Fallback - show notification
+            showNotification('Η σελίδα contact.html βρίσκεται στον κύριο φάκελο της εφαρμογής', 'info');
+        }
+    }
+    
+    // Make functions available globally
+    window.showContactModal = showContactModal;
+    window.openContactFile = openContactFile;
+    window.openContactHtml = openContactHtml;
+    
+    // ==================== END CONTACT FUNCTIONS ====================
+    
+    // ==================== NEW PERIOD EVENT LISTENERS ====================
+    
+    // New Period Modal Form Validation
+    const newPeriodCheckboxes = [
+        'new-period-backup-confirm',
+        'new-period-filename-confirm', 
+        'new-period-understand',
+        'new-period-backup-saved'
+    ];
+    
+    const newPeriodConfirmationText = document.getElementById('new-period-confirmation-text');
+    const confirmNewPeriodBtn = document.getElementById('confirm-new-period');
+    
+    function validateNewPeriodForm() {
+        const allChecked = newPeriodCheckboxes.every(id => 
+            document.getElementById(id).checked
+        );
+        const correctText = newPeriodConfirmationText.value.trim().toUpperCase() === 'ΝΕΑ ΠΕΡΙΟΔΟΣ';
+        
+        confirmNewPeriodBtn.disabled = !(allChecked && correctText);
+    }
+    
+    // Add event listeners to all checkboxes
+    newPeriodCheckboxes.forEach(id => {
+        const checkbox = document.getElementById(id);
+        if (checkbox) {
+            checkbox.addEventListener('change', validateNewPeriodForm);
+        }
+    });
+    
+    // Add event listener to confirmation text
+    if (newPeriodConfirmationText) {
+        newPeriodConfirmationText.addEventListener('input', validateNewPeriodForm);
+    }
+    
+    // Confirm button click handler
+    if (confirmNewPeriodBtn) {
+        confirmNewPeriodBtn.addEventListener('click', function() {
+            executeNewPeriod();
+        });
+    }
+    
+    // ==================== END NEW PERIOD EVENT LISTENERS ====================
     
     // Make function available globally
     window.openDocumentationWindow = openDocumentationWindow;
